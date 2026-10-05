@@ -1,0 +1,1203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A field reference for building and running a Global Capability Centre in India - strategy, build sequence, unit economics, compliance and failure modes, with every number marked for how far it can be trusted.">
+<meta name="author" content="Recruise Global">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The GCC Architect's Playbook">
+<meta property="og:description" content="India GCCs: strategy, costs, compliance and failure modes - with every number marked for how far it can be trusted.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231C0056'/%3E%3Cg fill='%237747FF'%3E%3Crect x='7' y='18' width='3' height='9'/%3E%3Crect x='12' y='12' width='3' height='15'/%3E%3Crect x='17' y='15' width='3' height='12'/%3E%3Crect x='22' y='6' width='3' height='21'/%3E%3C/g%3E%3C/svg%3E">
+<style>:root{padding:0}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>The GCC Architect's Playbook</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: fixed left rail of section pins + single editorial column, paper ground */
+:root{
+  --paper:#FAF7F0; --surface:#FFFFFF; --surface-2:#F4F0E6;
+  --ink:rgba(28,0,86,1); --ink-72:rgba(28,0,86,.72); --ink-55:rgba(28,0,86,.55); --ink-25:rgba(28,0,86,.25); --ink-08:rgba(28,0,86,.08);
+  --border:#EDE9E0;
+  --accent:#7747FF; --accent-2:#9767F1; --deep:#26035D; --indigo:#1C0056; --peach:#FFD3BA;
+  --good:#18BF71; --warn:#EEBA2B; --crit:#DF3A5B;
+  --font:'Avenir Next','Inter',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --r-card:14px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#130240; --surface:#1C0056; --surface-2:#1A0350;
+  --ink:#FAF7F0; --ink-72:rgba(250,247,240,.74); --ink-55:rgba(250,247,240,.56); --ink-25:rgba(250,247,240,.28); --ink-08:rgba(250,247,240,.09);
+  --border:rgba(250,247,240,.14);
+  --accent:#AE90FF; --accent-2:#C7B0FF;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --paper:#130240; --surface:#1C0056; --surface-2:#1A0350;
+  --ink:#FAF7F0; --ink-72:rgba(250,247,240,.74); --ink-55:rgba(250,247,240,.56); --ink-25:rgba(250,247,240,.28); --ink-08:rgba(250,247,240,.09);
+  --border:rgba(250,247,240,.14);
+  --accent:#AE90FF; --accent-2:#C7B0FF;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.62;margin:0;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:0}
+.eb{font:500 12px/1 var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:10px}
+.eb::before{content:"";width:16px;height:1.5px;background:currentColor;opacity:.7}
+.eb--pe{color:var(--peach)}
+
+/* hero */
+.hero{background:var(--indigo);color:var(--paper);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 22px);pointer-events:none}
+.hero-in{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:56px 44px;position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:40px;align-items:end}
+.hero h1{font-weight:500;letter-spacing:-.03em;font-size:clamp(2.1rem,5vw,3.5rem);line-height:1.04;margin:16px 0 0;text-wrap:balance;color:var(--paper)}
+.hero h1 em{font-style:normal;color:var(--peach)}
+.hero p{color:rgba(250,247,240,.78);font-size:17px;margin:16px 0 0;max-width:46ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chip{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:7px 11px;border:1px solid rgba(250,247,240,.26);color:rgba(250,247,240,.86)}
+.chip--on{background:var(--peach);color:var(--indigo);border-color:var(--peach)}
+
+/* body grid */
+.shell{display:grid;grid-template-columns:232px minmax(0,1fr);gap:48px;padding-block:48px}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;max-height:100vh;overflow-y:auto;padding-block:8px;font-size:13.5px}
+nav.toc .ttl{font:500 11px/1 var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-55);margin-bottom:14px}
+nav.toc a{display:flex;gap:10px;align-items:baseline;color:var(--ink-72);text-decoration:none;padding:5px 0;line-height:1.35}
+nav.toc a:hover{color:var(--accent)}
+nav.toc a span{font:500 10.5px/1.5 var(--mono);color:var(--ink-25);min-width:16px}
+main{min-width:0}
+section{scroll-margin-top:24px;padding-block:14px 40px;border-top:1px solid var(--border)}
+section:first-of-type{border-top:0;padding-top:0}
+h2{font-weight:500;letter-spacing:-.025em;font-size:clamp(1.5rem,3vw,2.05rem);line-height:1.14;margin:22px 0 14px;text-wrap:balance}
+h3{font-weight:500;font-size:1.06rem;letter-spacing:-.01em;margin:30px 0 10px}
+p{margin:0 0 14px;max-width:70ch}
+strong{font-weight:600}
+a{color:var(--accent)}
+ul,ol{margin:0 0 16px;padding-left:20px;max-width:70ch}
+li{margin-bottom:7px}
+.lede{font-size:17.5px;color:var(--ink-72);max-width:66ch}
+
+/* tables */
+.tw{overflow-x:auto;margin:0 0 20px;border:1px solid var(--border);border-radius:var(--r-card);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font:500 11px/1.3 var(--font);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-55);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td strong{font-weight:600}
+
+/* callouts */
+.note{border-left:3px solid var(--accent);background:var(--surface-2);padding:16px 18px;margin:0 0 20px;border-radius:0 var(--r-card) var(--r-card) 0}
+.note p:last-child{margin-bottom:0}
+.note--warn{border-left-color:var(--warn)}
+.note--crit{border-left-color:var(--crit)}
+.note .lbl{font:500 11px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-55);display:block;margin-bottom:8px}
+
+figure{margin:0 0 22px}
+figure svg{display:block;width:100%;height:auto;max-width:100%}
+figcaption{font-size:13px;color:var(--ink-55);margin-top:8px}
+.fig-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r-card);background:var(--surface);padding:18px}
+
+.log-entry{display:grid;grid-template-columns:104px minmax(0,1fr);gap:18px;padding:16px 0;border-bottom:1px solid var(--border)}
+.log-entry:last-child{border-bottom:0}
+.log-date{font:500 11px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);padding-top:3px}
+.log-entry h4{margin:0 0 6px;font-weight:600;font-size:15px}
+.log-entry p{margin:0 0 8px;font-size:14.5px}
+.log-entry p:last-child{margin-bottom:0}
+.tag{display:inline-block;font:500 10px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;padding:4px 7px;border:1px solid var(--ink-25);color:var(--ink-55);margin-right:6px;vertical-align:1px}
+.tag--new{border-color:var(--accent);color:var(--accent)}
+.tag--fix{border-color:var(--crit);color:var(--crit)}
+@media (max-width:620px){.log-entry{grid-template-columns:1fr;gap:6px}}
+footer{border-top:1px solid var(--border);padding-block:34px 56px;color:var(--ink-55);font-size:14px}
+footer a{color:var(--accent)}
+.src-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px;margin-bottom:26px}
+.src-grid h4{font:500 11px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+.src-grid ul{list-style:none;padding:0;margin:0;font-size:13.5px}
+.src-grid li{margin-bottom:6px}
+
+@media (max-width:900px){
+  .hero-in{grid-template-columns:1fr;gap:28px;padding-block:40px 34px}
+  .shell{grid-template-columns:1fr;gap:0;padding-block:28px}
+  nav.toc{position:static;max-height:none;border:1px solid var(--border);border-radius:var(--r-card);padding:16px;margin-bottom:32px;background:var(--surface)}
+  nav.toc .cols{columns:2;column-gap:18px}
+}
+@media (max-width:460px){nav.toc .cols{columns:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<header class="hero">
+  <div class="hero-in">
+    <div>
+      <span class="eb eb--pe">Recruise &middot; GCC Practice</span>
+      <h1>Everything that decides whether an India <em>GCC</em> works</h1>
+      <p>Strategy, build sequence, unit economics, compliance and the failure modes — with every number marked for how far it can actually be trusted.</p>
+      <p style="font-size:14px;color:rgba(250,247,240,.62);margin-top:10px">An open reference, published by Recruise Global. Figures are sourced and flagged; corrections welcome.</p>
+      <div class="meta">
+        <span class="chip">As of 5 Oct 2026</span>
+        <span class="chip">20 sections</span>
+        <span class="chip chip--on">24 claims independently verified</span>
+      </div>
+    </div>
+    <svg viewBox="0 0 420 150" role="img" aria-label="Pin field showing GCC maturity thinning from outpost to transformation hub" style="width:100%;height:auto">
+      <g fill="#FFD3BA">
+        <rect x="0" y="104" width="7" height="46"/><rect x="15" y="92" width="7" height="58"/><rect x="30" y="110" width="7" height="40"/>
+        <rect x="45" y="78" width="7" height="72"/><rect x="60" y="98" width="7" height="52"/><rect x="75" y="66" width="7" height="84"/>
+      </g>
+      <g fill="#9767F1">
+        <rect x="100" y="84" width="7" height="66"/><rect x="115" y="58" width="7" height="92"/><rect x="130" y="72" width="7" height="78"/>
+        <rect x="145" y="44" width="7" height="106"/><rect x="160" y="62" width="7" height="88"/><rect x="175" y="36" width="7" height="114"/>
+      </g>
+      <g fill="#7747FF">
+        <rect x="200" y="52" width="7" height="98"/><rect x="215" y="26" width="7" height="124"/><rect x="230" y="40" width="7" height="110"/>
+        <rect x="245" y="18" width="7" height="132"/><rect x="260" y="34" width="7" height="116"/><rect x="275" y="10" width="7" height="140"/>
+      </g>
+      <g fill="rgba(250,247,240,.30)">
+        <rect x="300" y="60" width="7" height="90"/><rect x="315" y="88" width="7" height="62"/><rect x="330" y="46" width="7" height="104"/>
+        <rect x="345" y="96" width="7" height="54"/><rect x="360" y="70" width="7" height="80"/><rect x="375" y="112" width="7" height="38"/>
+        <rect x="390" y="82" width="7" height="68"/><rect x="405" y="120" width="7" height="30"/>
+      </g>
+    </svg>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="shell">
+
+<nav class="toc" aria-label="Contents">
+  <div class="ttl">Contents</div>
+  <div class="cols">
+    <a href="#log"><span>&#9679;</span>Developments log</a>
+    <a href="#s1"><span>01</span>What a GCC is</a>
+    <a href="#s2"><span>02</span>The market</a>
+    <a href="#s3"><span>03</span>Greenfield vs brownfield</a>
+    <a href="#s4"><span>04</span>Five entry models</a>
+    <a href="#s5"><span>05</span>The decision gate</a>
+    <a href="#s6"><span>06</span>Location strategy</a>
+    <a href="#s7"><span>07</span>The build sequence</a>
+    <a href="#s8"><span>08</span>Legal and entity</a>
+    <a href="#s9"><span>09</span>Costing: setup</a>
+    <a href="#s10"><span>10</span>Costing: run rate</a>
+    <a href="#s11"><span>11</span>Costing: per FTE</a>
+    <a href="#s12"><span>12</span>Case study</a>
+    <a href="#s13"><span>13</span>Team structure</a>
+    <a href="#s14"><span>14</span>Compliance</a>
+    <a href="#s15"><span>15</span>Transfer pricing</a>
+    <a href="#s16"><span>16</span>State incentives</a>
+    <a href="#s17"><span>17</span>Failure modes</a>
+    <a href="#s18"><span>18</span>The maturity curve</a>
+    <a href="#s20"><span>19</span>Sources</a>
+  </div>
+</nav>
+
+<main>
+
+<section id="log" style="border-top:0;padding-top:0">
+<span class="eb">Updated daily</span>
+<h2>Developments log</h2>
+<p class="lede">New entries are added as GCC policy, cost, tax and market developments land. Corrections to the body of the playbook are flagged here too, so nothing changes silently.</p>
+<div class="log-entry">
+  <div class="log-date">5 Oct 2026</div>
+  <div>
+    <h4><span class="tag tag--fix">Correction</span>Fit-out, salary inflation and seat-ratio figures revised</h4>
+    <p>An independent validation run (24 claims, three-vote adversarial verification, 13 killed) corrected four things. Fit-out figures are now the exact Cushman &amp; Wakefield 2026 city table, cross-checked against JLL. The annual increment provision moved from a vague 8&ndash;12% to Aon&rsquo;s 9.1&ndash;9.3%. The claim that the arbitrage erodes by ~5 percentage points a year was removed as uncomputable. The 60&ndash;70 seats per 100 FTE assumption was removed after the underlying benchmark failed verification.</p>
+    <p>Two sourcing warnings were added above the setup-cost and per-FTE tables: no independent body has published a defensible India GCC cost-per-FTE benchmark, and every figure in circulation traces to firms selling GCC setup services.</p>
+  </div>
+</div>
+<div class="log-entry">
+  <div class="log-date">3 Oct 2026</div>
+  <div>
+    <h4><span class="tag tag--new">New</span>Playbook first published</h4>
+    <p>Twenty sections covering definitions, market, entry models, location, build sequence, legal structure, three costing views, a worked case study, org design, compliance, transfer pricing, state incentives, failure modes, the maturity curve and a field diagnostic.</p>
+  </div>
+</div>
+</section>
+
+<section id="s1">
+<span class="eb">01 &middot; Definitions</span>
+<h2>What a GCC actually is</h2>
+<p class="lede">A Global Capability Centre is a wholly-owned offshore entity of a parent company that employs its own people to do the parent's work.</p>
+<p>The defining test is employment and accountability: the engineer in Bengaluru is on the parent group's payroll, carries the parent's email domain, and sits in the parent's org chart. Everything else — size, charter, location, maturity — varies.</p>
+<p>That single test is what separates a GCC from outsourcing. In outsourcing, the vendor employs the people, owns the delivery risk, prices the output, and keeps the margin. In a GCC, the parent employs the people, owns the delivery risk, pays cost plus a regulated markup to itself, and keeps the capability. <strong>Outsourcing buys capacity; a GCC builds an asset.</strong></p>
+<h3>The vocabulary, used correctly</h3>
+<div class="tw"><table>
+<thead><tr><th>Term</th><th>What it means</th><th>Still in use?</th></tr></thead>
+<tbody>
+<tr><td><strong>GCC</strong></td><td>Global Capability Centre. Current standard term. Implies the centre owns capability, not just process.</td><td>Yes — the default</td></tr>
+<tr><td><strong>GIC</strong></td><td>Global In-house Centre. Nasscom's older term, same structure. Neutral on maturity.</td><td>Fading, still in reports</td></tr>
+<tr><td><strong>Captive</strong></td><td>The original term. Now carries a cost-arbitrage connotation; some buyers find it dated or faintly pejorative.</td><td>Use carefully</td></tr>
+<tr><td><strong>Shared Services Centre</strong></td><td>A GCC whose charter is transactional back office — AP/AR, payroll, HR ops. A subset, not a synonym.</td><td>Yes, precisely</td></tr>
+<tr><td><strong>COE</strong></td><td>Centre of Excellence. A capability pod <em>inside</em> a GCC. Not an entity type.</td><td>Yes</td></tr>
+<tr><td><strong>ER&amp;D centre</strong></td><td>A GCC whose charter is engineering and R&amp;D rather than IT or operations.</td><td>Yes</td></tr>
+<tr><td><strong>BPO / GBS vendor</strong></td><td>Third-party provider. The vendor employs the staff. Not a GCC.</td><td>Yes</td></tr>
+<tr><td><strong>Nano GCC</strong></td><td>5–50 FTE centre. Karnataka's GCC policy names and incentivises this tier explicitly.</td><td>New, growing</td></tr>
+</tbody></table></div>
+<h3>The four things a GCC is built to do</h3>
+<p>Most centres are justified on one of these, then drift across the others as they mature:</p>
+<ol>
+<li><strong>Cost</strong> — do the same work for 40–60% less total operating cost.</li>
+<li><strong>Talent access</strong> — reach a skill pool that does not exist, or is unaffordable, at headquarters.</li>
+<li><strong>Scale and speed</strong> — hire 200 engineers in a year, which the home market cannot absorb.</li>
+<li><strong>Control and IP</strong> — keep proprietary product, data or domain knowledge inside the group rather than with a vendor.</li>
+</ol>
+<div class="note"><span class="lbl">The first diagnostic</span><p>Ask which of these four is the real driver. The cost model, the location, the entry model and the leadership profile all change depending on the answer. A cost-driven centre and a talent-driven centre are different businesses wearing the same name.</p></div>
+</section>
+
+<section id="s2">
+<span class="eb">02 &middot; Market</span>
+<h2>The market, in validated numbers</h2>
+<p class="lede">India hosts roughly 1,700+ GCCs across nearly 3,000 units, employing about 1.9 million people, growing at roughly 9.8% CAGR.</p>
+<div class="tw"><table>
+<thead><tr><th>Measure</th><th>Figure</th><th>Horizon</th></tr></thead>
+<tbody>
+<tr><td>Number of GCCs</td><td><strong>1,700+</strong> (c.3,000 units)</td><td>2025–26</td></tr>
+<tr><td>Headcount</td><td><strong>~1.9m</strong></td><td>FY24 actual</td></tr>
+<tr><td>Revenue</td><td><strong>$64.6bn</strong></td><td>FY24 actual</td></tr>
+<tr><td>Revenue</td><td>$98–100bn</td><td>FY26 projected</td></tr>
+<tr><td>Revenue CAGR</td><td>9.8%</td><td>last 4 years</td></tr>
+<tr><td>Centres by 2030</td><td>2,400+</td><td>2030 projected</td></tr>
+<tr><td>Headcount by 2030</td><td>2.5m+</td><td>2030 projected</td></tr>
+<tr><td>Mid-market GCCs</td><td><strong>480+ centres, 210,000+ people</strong></td><td>2025</td></tr>
+<tr><td>Of those, set up in last 2 years</td><td>35%</td><td>FY23–25E</td></tr>
+<tr><td>Tier-2 GCC hiring growth</td><td>23% YoY, now 15% of all GCC hiring</td><td>2025–26</td></tr>
+</tbody></table></div>
+<div class="note"><span class="lbl">Independently verified</span><p><strong>GCCs are now the single largest office occupier group in India.</strong> They took roughly 32.6 mn sq ft in 2025 — 38% of 86.4 mn sq ft of transactions — with Bengaluru capturing 47% of all India GCC leasing. JLL puts GCC leasing at about 19.6 msf in H1 2026, 43% of all leasing and up 17% year on year.</p><p>This is the most commercially useful number here: GCC demand is no longer a segment of the office market, it <em>is</em> the office market. That is an argument you can make to a landlord, a state government or a sceptical CFO.</p></div>
+<h3>The three shifts that matter commercially</h3>
+<p><strong>1. The buyer has changed.</strong> The growth is no longer Fortune 500 first-centres — it is mid-market companies with $100m–$1bn revenue. 480+ mid-market GCCs now operate in India and 35% were established in the last two years. These buyers have no India playbook, no internal GCC team, and no patience for a 12-month build.</p>
+<p><strong>2. Mid-market centres mature faster, not slower.</strong> Despite operating at roughly 40% the scale of large-enterprise GCCs, mid-market centres show 1.3x higher presence as transformation hubs and advance along the maturity curve 1.2x faster. A smaller parent cannot afford a 500-person execution-only centre, so the India team gets real ownership earlier. India now holds 47% of global product management talent for mid-market GCCs.</p>
+<p><strong>3. Geography is decentralising under policy pressure.</strong> Budget 2025 announced a National Framework for GCCs aimed at tier-2 cities, and Karnataka, UP, Telangana and Gujarat have all published competing GCC policies with cash incentives. Tier-2 is the fastest-growing segment at 23% YoY.</p>
+<h3>How to use these numbers</h3>
+<p>The aggregate numbers are credible for positioning and keynotes; they are not a business case. No client decision should rest on "the market is $100bn." The numbers that move a deal are cost per FTE, payback month, and attrition-adjusted run rate. <strong>Lead with market data, close with unit economics.</strong></p>
+</section>
+
+<section id="s3">
+<span class="eb">03 &middot; Models</span>
+<h2>Greenfield vs brownfield, defined properly</h2>
+<p class="lede">Most writing on this borrows the manufacturing definition — new land versus existing plant — and applies it to GCCs, where it does not fit.</p>
+<p>In a GCC context the distinction is not about buildings. It is about whether you are starting from zero organisational footprint or absorbing one that already exists.</p>
+<p><strong>Greenfield:</strong> no prior legal entity, no employees, no leases, no vendor relationships, no India delivery history. You incorporate, lease, hire and build the culture from the first employee onward. Full design freedom, full timeline, full cost.</p>
+<p><strong>Brownfield:</strong> an India footprint already exists in some form and you are converting, absorbing or restructuring it. There are four distinct brownfield situations, and conflating them is the most common analytical error in this field.</p>
+<h3>The four kinds of brownfield</h3>
+<div class="tw"><table>
+<thead><tr><th>Type</th><th>What exists</th><th>What you are doing</th><th>Risk</th></tr></thead>
+<tbody>
+<tr><td><strong>EOR conversion</strong></td><td>10–40 people via an Employer of Record, no entity</td><td>Incorporate, then transfer employment to your own entity</td><td>Low. Mostly paperwork. Watch continuity of service for gratuity.</td></tr>
+<tr><td><strong>Vendor carve-out</strong></td><td>A dedicated team inside an outsourcing partner's entity</td><td>Hire that team out, or buy the delivery unit</td><td>High. Non-solicit clauses, vendor retaliation, team loyalty.</td></tr>
+<tr><td><strong>M&amp;A absorption</strong></td><td>An acquired company that happens to have India staff</td><td>Rationalise an inherited, unplanned footprint</td><td>High. Legacy comp bands, mismatched culture, redundant roles.</td></tr>
+<tr><td><strong>Scattered footprint</strong></td><td>15–30 people hired ad hoc across cities, no plan</td><td>Consolidate into one site, one charter, one comp structure</td><td>Medium. Relocation refusals, comp correction.</td></tr>
+</tbody></table></div>
+<div class="note"><span class="lbl">The undiagnosed case</span><p>The scattered-footprint case is extremely common in mid-market companies and almost always undiagnosed. The company does not think it has an India presence; it thinks it has "a few contractors." It is usually the first thing worth establishing.</p></div>
+<h3>Cost, timeline and risk compared</h3>
+<div class="tw"><table>
+<thead><tr><th>Dimension</th><th>Greenfield</th><th>EOR conversion</th><th>Carve-out / M&amp;A</th></tr></thead>
+<tbody>
+<tr><td>One-time setup cost</td><td>100% baseline</td><td>40–60% of greenfield</td><td>50–80%, plus deal cost</td></tr>
+<tr><td>Time to first productive FTE</td><td>4–6 months</td><td>6–10 weeks</td><td>3–5 months</td></tr>
+<tr><td>Time to stable operations</td><td>9–18 months</td><td>4–8 months</td><td>12–18 months</td></tr>
+<tr><td>Charter clarity</td><td>High — you design it</td><td>High</td><td>Low — you inherit it</td></tr>
+<tr><td>Culture control</td><td>Full</td><td>High</td><td>Low to none initially</td></tr>
+<tr><td>Talent quality control</td><td>Full — you hire everyone</td><td>High</td><td>None — you inherit the bench</td></tr>
+<tr><td>Attrition in year 1</td><td>15–25%</td><td>10–18%</td><td><strong>25–40%</strong> (change shock)</td></tr>
+<tr><td>Hidden-liability exposure</td><td>Minimal</td><td>Low</td><td><strong>High</strong> — statutory arrears, misclassified contractors, open litigation</td></tr>
+</tbody></table></div>
+<h3>The judgement call</h3>
+<p>Greenfield is slower and costs more, and almost always produces a better centre. Brownfield is faster and cheaper on paper, and the savings are routinely consumed by remediation — fixing comp structures, correcting misclassified contractors, clearing statutory arrears, replacing inherited talent.</p>
+<div class="note note--warn"><span class="lbl">The honest rule</span><p>Choose brownfield for speed <strong>only when the existing footprint has people you actually want to keep</strong>. If you would not re-hire 70% of the inherited team, you are not doing a brownfield GCC — you are doing a greenfield build with a severance bill attached. Price it that way.</p></div>
+</section>
+
+<section id="s4">
+<span class="eb">04 &middot; Models</span>
+<h2>The five entry models</h2>
+<p class="lede">Most advisory conversations collapse these into two — build or buy — which loses the two models that actually fit mid-market buyers.</p>
+<div class="tw"><table>
+<thead><tr><th>Model</th><th>How it works</th><th>First FTE</th><th>Upfront cash</th><th>Owns the people</th><th>Exit cost</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Direct captive greenfield</strong></td><td>You incorporate, lease, hire, operate</td><td>4–6 months</td><td>High ($500k–$3m)</td><td>You</td><td>High</td></tr>
+<tr><td><strong>2. BOT</strong></td><td>Partner builds and runs it, transfers on a trigger</td><td>6–12 weeks</td><td>Low–moderate</td><td>Partner, then you</td><td>Moderate</td></tr>
+<tr><td><strong>3. EOR-first, then convert</strong></td><td>Hire via EOR, incorporate in parallel, migrate</td><td><strong>1–2 weeks</strong></td><td>Near zero</td><td>EOR, then you</td><td>Very low</td></tr>
+<tr><td><strong>4. Managed GCC (MOGCC)</strong></td><td>You employ; partner supplies workspace, IT, compliance</td><td>8–12 weeks</td><td>Low</td><td>You</td><td>Low–moderate</td></tr>
+<tr><td><strong>5. Carve-out / brownfield</strong></td><td>Absorb an existing team from a vendor or acquisition</td><td>3–5 months</td><td>Deal-dependent</td><td>You, post-transfer</td><td>High</td></tr>
+</tbody></table></div>
+<h3>How each model actually costs out</h3>
+<ul>
+<li><strong>Direct captive:</strong> cheapest steady state, most expensive start. No partner margin on the run rate. Right when the three-year commitment is genuinely certain.</li>
+<li><strong>BOT:</strong> a build fee, a vendor margin during the operate phase, then a transfer fee. Compresses go-live to as little as six months against 12–24 for an unassisted greenfield. <strong>The transfer price is the negotiation</strong> — fix it in the original contract, never leave it to "fair market value at the time."</li>
+<li><strong>EOR-first:</strong> $99–$399/employee/month with India specialists, $499–$699+ with global platforms, on top of salary plus 20–25% statutory. Setup is $0–$1,000 against $15,000–$25,000+ for an entity. Crossover to an owned entity is around 12–40 employees, or roughly $500,000 annual offshore spend. An own entity adds $2,000–$3,500/month of standing overhead per state.</li>
+<li><strong>Managed GCC:</strong> all-in managed workspace in Bengaluru runs roughly ₹8,000–₹15,000 per seat per month mid-market, up to ₹24,000 at premium finish. You avoid the fit-out capex entirely and keep the employment relationship, which is the part that matters.</li>
+<li><strong>Carve-out:</strong> budget remediation at 15–25% of first-year people cost for comp correction, statutory clean-up and replacement hiring.</li>
+</ul>
+<h3>The decision matrix</h3>
+<div class="tw"><table>
+<thead><tr><th>If the client…</th><th>Choose</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>Wants under 15 people, testing the thesis</td><td><strong>EOR-first</strong></td><td>No entity, no capex, reversible in 30 days</td></tr>
+<tr><td>Wants 20–75 fast, no India capability</td><td><strong>Managed GCC</strong></td><td>Keeps employment, outsources the plumbing</td></tr>
+<tr><td>Wants 75–300, has budget, lacks experience</td><td><strong>BOT</strong></td><td>De-risks the build, transfers on a trigger</td></tr>
+<tr><td>Wants 100+, has done this before</td><td><strong>Direct captive</strong></td><td>Lowest long-run cost, full control</td></tr>
+<tr><td>Already has 20+ scattered India staff</td><td><strong>Brownfield consolidation</strong></td><td>Formalise it before it becomes a liability</td></tr>
+<tr><td>Has a vendor team doing the work well</td><td><strong>Carve-out, or stay outsourced</strong></td><td>Only move if the capability is strategic and the team retainable</td></tr>
+</tbody></table></div>
+<div class="note"><span class="lbl">Sequencing</span><p>These are not mutually exclusive, and the strongest approach is to sequence them. <strong>EOR → managed GCC → own entity</strong> lets a company start hiring in two weeks, prove the model with 10–15 people, and incorporate only once the business case is self-evident. It defers the entity decision — the decision that stalls most mid-market GCC programmes for six months.</p></div>
+</section>
+
+<section id="s5">
+<span class="eb">05 &middot; Qualification</span>
+<h2>The decision gate: should they build one at all?</h2>
+<p class="lede">A GCC is a fixed-cost, long-duration commitment dressed up as a cost-saving initiative.</p>
+<p>Most failed centres were approved by people who had not tested these six gates. Running these honestly — including concluding that the answer is no — is what separates a real assessment from a sales process.</p>
+<h3>The six qualifying gates</h3>
+<ol>
+<li><strong>Scale.</strong> Is there a credible path to 25+ FTE within 18 months? Below that, fixed overhead is not amortised and per-FTE cost stays near home-market cost. Under 25 people, the answer is EOR.</li>
+<li><strong>Duration.</strong> Committed for three years minimum? Setup cost is recovered over 18–36 months. Ask directly: <em>what would have to happen for you to shut this down in year two?</em></li>
+<li><strong>Work-definability.</strong> Can the work be specified well enough to be executed 8,000 km away? Work that depends on daily corridor conversations with a founder does not transfer.</li>
+<li><strong>Sponsor.</strong> Is there one named executive at HQ whose own objectives depend on this succeeding? Not a steering committee. This is the strongest single predictor of success, and the most common gap.</li>
+<li><strong>Headroom.</strong> Enough work for three years, or hiring against a hope? A centre that runs out of mandate at month 14 enters the attrition spiral immediately.</li>
+<li><strong>Tolerance.</strong> Can the organisation absorb 15–25% attrition, a 3–6 month leadership search, and a first-year productivity dip? If the CFO expects savings in quarter two, the project will be killed before it works.</li>
+</ol>
+<h3>The disqualifiers — say no to these</h3>
+<ul>
+<li>The driver is purely a cost target from a PE sponsor, with no capability intent. These get cut in the next portfolio review.</li>
+<li>Headcount under 15 with no growth plan. Use an EOR instead.</li>
+<li>The parent is in distress, mid-sale, or between CEOs. Entity decisions do not survive a change of sponsor.</li>
+<li>The work is a single client contract that could be lost. The centre dies with the contract.</li>
+<li>HQ leadership privately believes offshore work is lower quality. Culture beats business case.</li>
+</ul>
+<div class="note"><span class="lbl">The minimum viable GCC</span><p><strong>25 FTE, a three-year commitment, one named HQ sponsor, and a charter that can be written in one sentence.</strong> Below any of those four, the EOR on-ramp is the right answer, and the question is worth revisiting in two quarters.</p></div>
+<h3>When outsourcing is the honest answer</h3>
+<p>Recommend a vendor when the work is non-core and unlikely to become core; when volume is genuinely variable and needs to flex down as well as up; when scale never exceeds 20 people; or when the skill is so niche that no sustainable India bench exists. Saying this out loud, early, is what makes the rest of the assessment credible.</p>
+</section>
+
+<section id="s6">
+<span class="eb">06 &middot; Location</span>
+<h2>Location strategy</h2>
+<p class="lede">City choice moves total cost by 25–50% and attrition by 10–15 percentage points. It is routinely decided on the basis of where the CEO has visited.</p>
+<h3>Tier-1 cities compared</h3>
+<div class="tw"><table>
+<thead><tr><th>City</th><th>Rent ₹/sq ft/mo</th><th>Fit-out ₹/sq ft</th><th>Salary index</th><th>Attrition</th><th>Talent depth</th></tr></thead>
+<tbody>
+<tr><td><strong>Bengaluru</strong></td><td>80–120</td><td>6,027</td><td>100 (baseline)</td><td>~25%</td><td>Deepest for product, AI/ML, platform</td></tr>
+<tr><td><strong>Hyderabad</strong></td><td>60–90</td><td>5,847</td><td>88–92</td><td>~18%</td><td>Engineering, cloud, pharma tech</td></tr>
+<tr><td><strong>Pune</strong></td><td>60–120</td><td>5,847</td><td>75–85</td><td>~14%</td><td>Automotive ER&amp;D, embedded</td></tr>
+<tr><td><strong>Chennai</strong></td><td>Comparable to Pune</td><td>5,847</td><td>78–85</td><td>~14%</td><td>BFSI ops, semiconductors</td></tr>
+<tr><td><strong>Delhi NCR</strong></td><td>Comparable to Bengaluru</td><td>6,207 (Delhi)</td><td>92–98</td><td>~20%</td><td>Consulting, analytics, GBS</td></tr>
+<tr><td><strong>Mumbai</strong></td><td>30–40% above Bengaluru</td><td>6,567</td><td>100–110</td><td>~22%</td><td>BFSI, risk, capital markets</td></tr>
+</tbody></table></div>
+<p style="font-size:14px;color:var(--ink-55)">Fit-out figures are Cushman &amp; Wakefield's 2026 city table for a collaborative hybrid workplace specification — one finish standard, not a basic-to-premium range — corroborated within 1–2% by JLL (India medium-spec average ₹5,788; Mumbai ₹6,588). Two cautions: C&amp;W publishes a "Delhi" figure, so applying it to Gurugram or Noida is an extrapolation the table does not make; and C&amp;W covers eight metros only, so every tier-2 fit-out number below is inferred, not sourced. Rent and attrition columns are directional — the Knight Frank city rent table failed verification.</p>
+<div class="note"><span class="lbl">Verified October 2026</span><p><strong>The 2026 market is landlord-favourable, and any model assuming otherwise is wrong.</strong> Pan-India vacancy hit a five-year low — JLL reports 14.5% across the top seven cities, down 160 bps year on year; C&amp;W reports 13.7% across the top eight. Q2 2026 net absorption was 11.6 msf against 12.2 msf of new Grade-A completions. Rents are appreciating across all major cities, led by Hyderabad at 11.9% YoY, then Delhi NCR 7.7% and Bengaluru 5.4%.</p><p>Two cautions on those growth figures. They are market-rent movements across transacted Grade-A stock, not contractual escalations inside an existing lease — different quantities, and comparing them is a category error. And only Hyderabad runs well above a typical escalation band; Bengaluru sits inside it. The practical consequence: there is no tenant leverage in this market, so assume you pay asking, assume escalation, and lock space earlier than feels comfortable.</p></div>
+<h3>Tier-2 cities</h3>
+<p>Tier-2 markets deliver 25–50% lower real estate, talent and operating costs, and attrition of 10–12% against 18–22% in metros, largely because there are fewer competing employers to poach into. The working rule: <strong>70–85% of tier-1 talent quality at 70–85% of tier-1 cost.</strong> Mid-level engineers in Coimbatore, Jaipur and Kochi command 25–35% less than Bengaluru equivalents for comparable technical depth.</p>
+<div class="tw"><table>
+<thead><tr><th>City</th><th>The specific case for it</th><th>Watch out for</th></tr></thead>
+<tbody>
+<tr><td><strong>Coimbatore</strong></td><td>40+ engineering institutions within 100 km — a self-replenishing pipeline</td><td>Thin senior leadership bench; you will import leaders</td></tr>
+<tr><td><strong>Kochi</strong></td><td>Infopark hosts 350+ IT companies; direct international connectivity</td><td>Smaller pool; strong outbound migration pull</td></tr>
+<tr><td><strong>Indore</strong></td><td>Low cost, improving infrastructure, strong state support</td><td>Limited product/AI depth</td></tr>
+<tr><td><strong>Jaipur</strong></td><td>Cost arbitrage plus NCR proximity</td><td>Competing on cost alone, little specialisation</td></tr>
+<tr><td><strong>Ahmedabad</strong></td><td>Gujarat's ₹10,000 crore GCC push; finance and ops talent</td><td>Weaker deep-tech pool</td></tr>
+<tr><td><strong>Chandigarh</strong></td><td>Quality of life aids retention; good for ops and support</td><td>Small scale ceiling</td></tr>
+</tbody></table></div>
+<h3>The multi-hub model</h3>
+<p>The emerging default above 300 FTE is not one city — it is a tier-1 anchor plus a tier-2 scale site. The anchor holds leadership, architecture and product management; the tier-2 site holds engineering pods, QA, support and operations where retention matters more than market depth. Blended cost lands 15–25% below a single tier-1 site.</p>
+<h3>How to actually run a site selection</h3>
+<p>Score candidate cities on seven weighted criteria rather than arguing about them:</p>
+<ol>
+<li><strong>Talent availability at your specific skill</strong> — not "IT talent." Count live job postings and competitor headcount in that city.</li>
+<li><strong>Salary index</strong> for those roles against Bengaluru.</li>
+<li><strong>Competitive intensity</strong> — how many employers will bid for your people. This drives attrition more than anything else.</li>
+<li><strong>Real estate cost and Grade-A availability</strong> including vacancy rate.</li>
+<li><strong>State incentive value</strong>, net of the conditions attached.</li>
+<li><strong>Connectivity</strong> — direct or one-stop flights from HQ. Executive visit frequency correlates with centre success.</li>
+<li><strong>Leadership attractability</strong> — can you persuade a ₹1.5–3 crore GCC head to live there? This disqualifies more tier-2 cities than any cost factor.</li>
+</ol>
+<p>Weight talent availability and competitive intensity highest. Cost differences between shortlisted cities are usually 10–20%; a wrong talent call costs 40%+ in attrition and replacement.</p>
+</section>
+
+
+<section id="s7">
+<span class="eb">07 &middot; Build</span>
+<h2>The build sequence</h2>
+<p class="lede">A greenfield captive build reaches go-live in 4–6 months; a managed or EOR-first build in 6–12 weeks.</p>
+<p>The difference is not effort — it is how much of the critical path you own. The two tracks that must start in week one are the ones with the longest lead times and no shortcut: the leadership search and the entity incorporation.</p>
+<figure>
+<div class="fig-wrap">
+<svg viewBox="0 0 760 460" role="img" aria-label="Greenfield GCC build timeline: leadership search and entity work both start in week one, go-live at week 18" style="font-family:var(--font);font-size:13px">
+  <text x="24" y="30" font-size="15" font-weight="500" fill="var(--ink)">Leadership search and entity work both start in week one</text>
+  <text x="24" y="50" font-size="11.5" fill="var(--ink-55)">Greenfield GCC build, parallel tracks, weeks from mandate</text>
+  <g stroke="var(--ink-08)">
+    <line x1="206" x2="206" y1="90" y2="428"/><line x1="262" x2="262" y1="90" y2="428"/>
+    <line x1="319" x2="319" y1="90" y2="428"/><line x1="375" x2="375" y1="90" y2="428"/>
+    <line x1="431" x2="431" y1="90" y2="428"/><line x1="487" x2="487" y1="90" y2="428"/>
+    <line x1="544" x2="544" y1="90" y2="428"/><line x1="600" x2="600" y1="90" y2="428"/>
+  </g>
+  <g font-size="11.5" fill="var(--ink-55)" text-anchor="middle">
+    <text x="206" y="80">W1</text><text x="262" y="80">W5</text><text x="319" y="80">W9</text><text x="375" y="80">W13</text>
+    <text x="431" y="80">W17</text><text x="487" y="80">W21</text><text x="544" y="80">W25</text><text x="600" y="80">W29</text>
+  </g>
+  <line x1="206" x2="614" y1="90" y2="90" stroke="var(--ink-25)"/>
+  <line x1="445" x2="445" y1="90" y2="428" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <g fill="var(--accent)" fill-opacity=".22" stroke="var(--accent)" stroke-width="1.25">
+    <rect x="206" y="109" width="28" height="14"/>
+    <rect x="220" y="139" width="42" height="14"/>
+    <rect x="206" y="169" width="295" height="14"/>
+    <rect x="234" y="199" width="155" height="14"/>
+    <rect x="262" y="229" width="155" height="14"/>
+    <rect x="319" y="259" width="126" height="14"/>
+    <rect x="347" y="289" width="126" height="14"/>
+    <rect x="319" y="319" width="126" height="14"/>
+    <rect x="445" y="379" width="169" height="14"/>
+  </g>
+  <path d="M445 348l9 9l-9 9l-9 -9z" fill="var(--accent)"/>
+  <g font-size="11.5" fill="var(--ink-55)">
+    <text x="246" y="120">wk 1-3</text><text x="274" y="150">wk 2-5</text><text x="513" y="180">wk 1-22</text>
+    <text x="401" y="210">wk 3-14</text><text x="429" y="240">wk 5-16</text><text x="457" y="270">wk 9-18</text>
+    <text x="485" y="300">wk 11-20</text><text x="457" y="330">wk 9-18</text>
+    <text x="466" y="360" font-weight="600" fill="var(--ink)">week 18</text><text x="626" y="390">wk 18-30</text>
+  </g>
+  <g fill="var(--ink)">
+    <text x="24" y="120">Mandate and charter</text><text x="24" y="150">Site selection</text>
+    <text x="24" y="180">Leadership search</text><text x="24" y="210">Entity incorporation</text>
+    <text x="24" y="240">Workspace, fit-out</text><text x="24" y="270">Tax, TP, compliance</text>
+    <text x="24" y="300">IT and security</text><text x="24" y="330">Hiring wave 1</text>
+    <text x="24" y="360" font-weight="600">Go-live</text><text x="24" y="390">Scale to plan</text>
+  </g>
+</svg>
+</div>
+<figcaption>GCC build sequence &middot; 10 tracks, go-live at week 18</figcaption>
+</figure>
+<p>The critical path runs through leadership, not through the entity. Incorporation takes 8–12 weeks of largely parallel paperwork; finding a GCC head takes 3–6 months of search. Start both on day one and the entity is ready before the leader is.</p>
+<h3>What each track actually contains</h3>
+<p><strong>Mandate and charter (weeks 1–3).</strong> Write the charter: what the centre does, what it explicitly does not do, the headcount curve, and the named HQ sponsor. One page. If this cannot be written in week three, the project is not ready.</p>
+<p><strong>Site selection (weeks 2–5).</strong> Score cities on the seven criteria. Visit the shortlist. Do not sign anything.</p>
+<p><strong>Leadership search (weeks 1–22).</strong> Launch immediately. Budget 3–6 months and expect one failed offer. The first senior hires come through this person's network, so every week of delay compounds.</p>
+<p><strong>Entity incorporation (weeks 3–14).</strong> SPICe+ filing, resident director, PAN/TAN, GST, bank account, FIRMS entity master, then payroll registrations. The usual delay is apostilled parent documents — start collecting them in week one.</p>
+<p><strong>Workspace (weeks 5–16).</strong> Managed office compresses this to 3–4 weeks and removes the fit-out capex. A conventional lease plus fit-out adds 3–6 months and is the single largest source of slippage.</p>
+<p><strong>Tax, TP and compliance (weeks 9–18).</strong> Intercompany MSA, cost allocation policy, IP assignment, transfer pricing position, compliance calendar, payroll provider. All live before the first invoice to the parent.</p>
+<p><strong>IT and security (weeks 11–20).</strong> Network, endpoints, identity, access controls, DLP, VPN or zero-trust. For regulated parents this track, not the entity, becomes the critical path — scope it in week one.</p>
+<p><strong>Hiring wave 1 (weeks 9–18).</strong> Senior roles first. Note the deliberate overlap: hiring begins before the workspace is finished, which is why interim or managed space matters.</p>
+<h3>The gates</h3>
+<ol>
+<li><strong>Week 5 — charter and city confirmed.</strong> No charter, no lease, no incorporation.</li>
+<li><strong>Week 14 — entity live and leader signed.</strong> If the leader has not signed, pause hiring rather than letting an HQ manager build the first cohort.</li>
+<li><strong>Week 18 — go-live.</strong> Entity, workspace, IT, compliance and the first cohort all in place.</li>
+<li><strong>Week 30 — ramp checkpoint.</strong> At 60–70% of planned headcount, with attrition and productivity measured, commit to the long lease. Not before.</li>
+</ol>
+</section>
+
+<section id="s8">
+<span class="eb">08 &middot; Legal</span>
+<h2>Legal and entity architecture</h2>
+<p class="lede">For a GCC there is effectively one right answer: a wholly-owned subsidiary structured as a private limited company.</p>
+<p>The alternatives exist and almost all are wrong for this use case. Knowing why is what makes you credible with a client's general counsel.</p>
+<div class="tw"><table>
+<thead><tr><th>Structure</th><th>Employ staff?</th><th>Service the parent?</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td><strong>Private limited (WOS)</strong></td><td>Yes</td><td>Yes</td><td><strong>The answer.</strong> 100% FDI automatic route, limited liability, clean TP, scalable</td></tr>
+<tr><td><strong>LLP</strong></td><td>Yes</td><td>Yes</td><td>Workable but poor. Restrictive FDI rules, unfamiliar to foreign auditors, weak for ESOP</td></tr>
+<tr><td><strong>Branch office</strong></td><td>Limited</td><td>Restricted list</td><td>No. RBI/AD approval, higher tax rates, activity-restricted</td></tr>
+<tr><td><strong>Liaison office</strong></td><td>No</td><td>No</td><td>No. Representative function only</td></tr>
+<tr><td><strong>Project office</strong></td><td>Project-bound</td><td>Only that project</td><td>No. Finite life, tied to one contract</td></tr>
+</tbody></table></div>
+<h3>The FDI position</h3>
+<p>IT, ITES, software development and most GCC activity sit under the <strong>automatic route</strong> — 100% foreign ownership, no prior approval. The government route applies to restricted sectors such as defence, telecom and media. Confirm the cap against the <em>activity</em>, not the industry: a media company's engineering GCC is usually automatic-route IT, but one doing broadcast operations may not be.</p>
+<h3>Incorporation mechanics</h3>
+<p>Incorporation runs through <strong>SPICe+</strong> on the MCA portal and realistically takes 8–12 weeks for a foreign parent, with the delay almost always in apostilled parent documents, not the filing.</p>
+<ul>
+<li>Minimum <strong>two directors</strong>, at least one <strong>resident in India</strong> (182+ days). The most common cause of delay — identify them in week one.</li>
+<li>Minimum one shareholder; a foreign company may hold 100%.</li>
+<li>DINs and digital signature certificates for all directors.</li>
+<li>A registered office address in India from day one.</li>
+</ul>
+<h3>The registration stack</h3>
+<div class="tw"><table>
+<thead><tr><th>Registration</th><th>Purpose</th><th>When</th></tr></thead>
+<tbody>
+<tr><td>SPICe+ / Certificate of Incorporation</td><td>Legal existence, CIN issued</td><td>Week 1–8</td></tr>
+<tr><td>PAN and TAN</td><td>Tax identity; TDS deduction account</td><td>With incorporation</td></tr>
+<tr><td>GST registration</td><td>Invoice the parent, claim input credit on exports</td><td>Immediately after</td></tr>
+<tr><td>AD Category-I bank account</td><td>Receive FDI, remit, hold working capital</td><td>Before capital inflow</td></tr>
+<tr><td>Entity Master, RBI FIRMS portal</td><td>Prerequisite for all FDI reporting</td><td>Before first inflow</td></tr>
+<tr><td>FC-GPR filing</td><td>Report share allotment against FDI</td><td>Within 30 days</td></tr>
+<tr><td>Shops &amp; Establishments</td><td>State licence to operate and employ</td><td>Before first employee</td></tr>
+<tr><td>EPFO (Provident Fund)</td><td>Mandatory at 20+ employees</td><td>At or before 20 FTE</td></tr>
+<tr><td>ESIC</td><td>State insurance, wages to ₹21,000/month</td><td>With payroll setup</td></tr>
+<tr><td>Professional Tax</td><td>State employee tax, ~₹2,500/yr cap</td><td>With payroll setup</td></tr>
+<tr><td>STPI registration <em>(optional)</em></td><td>Duty-free imports, Softex filings</td><td>If using the scheme</td></tr>
+<tr><td>IEC from DGFT</td><td>Import-export code for hardware</td><td>If importing</td></tr>
+</tbody></table></div>
+<h3>The ongoing FEMA filings</h3>
+<p>These get missed and later surface as penalties during diligence:</p>
+<ul>
+<li><strong>FC-GPR</strong> — on every share allotment to the parent, within 30 days.</li>
+<li><strong>FC-TRS</strong> — on any share transfer between residents and non-residents.</li>
+<li><strong>FLA return</strong> — annually by 15 July, mandatory for any company with FDI, even dormant.</li>
+<li><strong>APR</strong> — where applicable to overseas investment structures.</li>
+</ul>
+<h3>The intercompany paper that must exist</h3>
+<p>A GCC with no service agreement is a transfer pricing adjustment waiting to happen. Before the first invoice:</p>
+<ol>
+<li><strong>Master Services Agreement</strong> specifying scope, service levels, cost base and markup methodology.</li>
+<li><strong>Cost allocation policy</strong> — what sits in the cost base and what is passed through.</li>
+<li><strong>IP assignment clauses</strong> confirming all work product vests in the parent. Retrofitting this across 200 employment contracts is expensive.</li>
+<li><strong>Secondment agreements</strong> for HQ staff working in India and vice versa — a permanent-establishment risk if left informal.</li>
+</ol>
+</section>
+
+<section id="s9">
+<span class="eb">09 &middot; Costing</span>
+<h2>One-time setup</h2>
+<p class="lede">Total one-time setup runs $500,000 to $3 million (roughly ₹4.75–28.5 crore), depending on scale and finish.</p>
+<p>The range is wide because fit-out and IT dominate, and both scale with headcount and ambition rather than with the entity work. USD–INR converted at approximately ₹88/$ — restate at the live rate for any client proposal, since a 5% currency move changes a 250-FTE business case by more than most line items.</p>
+<h3>Line-item build-up</h3>
+<div class="tw"><table>
+<thead><tr><th>Line item</th><th>Low</th><th>High</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Incorporation (SPICe+, DIN, DSC, stamp duty)</td><td>$3,000</td><td>$8,000</td><td>Higher with apostille and translation</td></tr>
+<tr><td>Legal — structuring, MSA, IP, employment templates</td><td>$8,000</td><td>$40,000</td><td>The line clients cut and later regret</td></tr>
+<tr><td>Tax and TP advisory — structuring, benchmarking</td><td>$10,000</td><td>$35,000</td><td>Mandatory in substance</td></tr>
+<tr><td>Registrations (GST, PF, ESI, PT, S&amp;E, STPI, IEC)</td><td>$2,000</td><td>$7,000</td><td>Mostly professional fees</td></tr>
+<tr><td><strong>Subtotal: legal and regulatory</strong></td><td><strong>$23,000</strong></td><td><strong>$90,000</strong></td><td>Often quoted as $10k–$25k; that is incorporation only</td></tr>
+<tr><td>Lease security deposit (6–12 months' rent)</td><td>$30,000</td><td>$200,000</td><td>Refundable, but it is cash out</td></tr>
+<tr><td>Office fit-out</td><td>$50,000</td><td>$250,000+</td><td>₹800–2,500/sq ft basic to mid per Indian design-build quotes; ₹5,847–6,567/sq ft on C&amp;W's collaborative hybrid benchmark</td></tr>
+<tr><td>Furniture and workstations</td><td>$15,000</td><td>$90,000</td><td>Often inside the fit-out quote — check</td></tr>
+<tr><td><strong>Subtotal: real estate</strong></td><td><strong>$95,000</strong></td><td><strong>$540,000</strong></td><td>Zero under a managed-office model</td></tr>
+<tr><td>Laptops and peripherals</td><td>$25,000</td><td>$120,000</td><td>$800–$1,600 per seat</td></tr>
+<tr><td>Network, firewall, switching, cabling</td><td>$15,000</td><td>$50,000</td><td></td></tr>
+<tr><td>Servers / on-prem infrastructure</td><td>$0</td><td>$60,000</td><td>Zero in cloud-native builds</td></tr>
+<tr><td>Security — endpoint, DLP, access control, CCTV</td><td>$10,000</td><td>$50,000</td><td>Rises sharply for regulated industries</td></tr>
+<tr><td><strong>Subtotal: IT hardware and network</strong></td><td><strong>$50,000</strong></td><td><strong>$280,000</strong></td><td></td></tr>
+<tr><td>Software licences and tooling (year 1)</td><td>$30,000</td><td>$100,000</td><td>Per-seat licensing is the hidden multiplier</td></tr>
+<tr><td>Recruitment — leadership search</td><td>$40,000</td><td>$120,000</td><td>25–33% of CTC for the head and first leaders</td></tr>
+<tr><td>Recruitment — bulk hiring</td><td>$30,000</td><td>$150,000</td><td>8–12% of CTC typical for the first wave</td></tr>
+<tr><td>GCC advisory / BOT mobilisation</td><td>$0</td><td>$300,000</td><td>Model-dependent</td></tr>
+<tr><td>Relocation and HQ travel during build</td><td>$20,000</td><td>$80,000</td><td>Budget more than you think</td></tr>
+<tr><td>Branding, signage, launch</td><td>$5,000</td><td>$30,000</td><td></td></tr>
+<tr><td><strong>Contingency at 10–15%</strong></td><td colspan="2">Apply to the total</td><td>Non-negotiable</td></tr>
+</tbody></table></div>
+<h3>Setup cost by team size</h3>
+<div class="tw"><table>
+<thead><tr><th>Team size</th><th>One-time setup</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>25 FTE</td><td>$300k–$700k</td><td>Vendor-published</td></tr>
+<tr><td>50 FTE</td><td>$500k–$1.2m</td><td>Vendor-published</td></tr>
+<tr><td>100 FTE</td><td>$900k–$2.0m</td><td>Vendor-published</td></tr>
+<tr><td>250 FTE</td><td>$1.5m–$3.5m</td><td>Vendor-published</td></tr>
+<tr><td>500 FTE</td><td>$2.5m–$5.5m</td><td>Extrapolated — directional only</td></tr>
+</tbody></table></div>
+<div class="note note--crit"><span class="lbl">Sourcing warning</span><p>This table, and the per-FTE table in section 11, come from GCC service providers rather than independent research. An October 2026 validation run put the underlying benchmarks to adversarial verification and they did not survive: EY's published GCC cost-per-FTE benchmarks were refuted, and no independent source was found for the $500k–$3m range, the by-team-size breakdown, or the 500-FTE extrapolation. Zinnov — the most-cited source in this field — self-reports 220+ GCC setups and is a vendor with a direct commercial stake; nasscom co-branding does not make it independent.</p><p><strong>Use these figures to frame a discussion, never to anchor a contract.</strong> Build a bottom-up model from the line items above, which are individually verifiable, rather than from anyone's headline range.</p></div>
+<h3>Where the money actually goes wrong</h3>
+<ul>
+<li><strong>Fit-out is the single biggest variance.</strong> Indian design-build contractors quote ₹800–2,500/sq ft for basic-to-mid finish, against C&amp;W's 2026 collaborative-hybrid benchmark of ₹5,847–6,567/sq ft — a 3–4x span on the largest capex line. Treat these as two different measurement bases rather than two ends of one range, and establish which basis a quote is on before comparing it to anything.</li>
+<li><strong>Seat density drives everything.</strong> At 80 sq ft/seat versus 120 sq ft/seat, a 100-person centre needs 8,000 versus 12,000 sq ft — a 50% difference in both rent and fit-out. A seat ratio below 1:1 is normal under hybrid working, but no independent source supports a specific number — the commonly cited 1.5 headcount per seat benchmark failed verification in October 2026. Derive the ratio from the client's own observed attendance.</li>
+<li><strong>Security deposits are forgotten</strong> in the business case, then surface as a cash-flow surprise at lease signing.</li>
+<li><strong>Recruitment fees are systematically underestimated.</strong> At 10% average on a 100-person first-year ramp with 20% attrition replacement, that is 120 hires, not 100.</li>
+<li><strong>Managed office eliminates roughly $95k–$540k of this table</strong> in exchange for a higher per-seat run rate. For anything under 75 FTE or any uncertain charter, that trade is usually correct.</li>
+</ul>
+</section>
+
+<section id="s10">
+<span class="eb">10 &middot; Costing</span>
+<h2>The steady-state run rate</h2>
+<p class="lede">People cost is 70–80% of total operating cost per FTE. Everything else is rounding.</p>
+<p>Which is why location and comp strategy matter more than any procurement saving on rent or hardware.</p>
+<h3>Salary bands — India GCC, 2026</h3>
+<p>Annual CTC in ₹ lakhs, Bengaluru-benchmarked. Apply the city index: Hyderabad 0.88–0.92, Pune/Chennai 0.75–0.85, tier-2 0.65–0.75.</p>
+<div class="tw"><table>
+<thead><tr><th>Role band</th><th>Experience</th><th>Bengaluru CTC (₹L)</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Software engineer, entry</td><td>0–2 yrs</td><td>8–14</td><td>Campus hiring lower</td></tr>
+<tr><td>Software engineer, mid</td><td>3–6 yrs</td><td>18–26</td><td>Mid-market GCCs often 14–22</td></tr>
+<tr><td>Senior software engineer</td><td>6–10 yrs</td><td>28–42</td><td><strong>The band where attrition peaks</strong></td></tr>
+<tr><td>Staff / principal engineer</td><td>10–15 yrs</td><td>45–75</td><td>Scarce; bid against product companies</td></tr>
+<tr><td>Data engineer, mid</td><td>3–6 yrs</td><td>17–26</td><td></td></tr>
+<tr><td>Data scientist, mid</td><td>3–6 yrs</td><td>20–30</td><td></td></tr>
+<tr><td>Data scientist, senior</td><td>8–12 yrs</td><td>35–60</td><td></td></tr>
+<tr><td>AI/ML engineer</td><td>4–8 yrs</td><td>30–55</td><td>Premium band; 25–30% attrition</td></tr>
+<tr><td>Engineering manager</td><td>10–14 yrs</td><td>50–85</td><td></td></tr>
+<tr><td>Director / senior director</td><td>15–20 yrs</td><td>85–180</td><td></td></tr>
+<tr><td>GCC head / site leader</td><td>18–25 yrs</td><td>140–450</td><td>Wide — scale and charter dependent</td></tr>
+<tr><td>Finance / HR / ops manager</td><td>8–12 yrs</td><td>20–40</td><td></td></tr>
+<tr><td>IT support engineer</td><td>2–5 yrs</td><td>6–12</td><td></td></tr>
+</tbody></table></div>
+<p><strong>GCCs pay 25–40% above Indian IT services firms at mid-senior level</strong> — budget to that premium or lose every competitive offer.</p>
+<h3>Statutory loading — the exact build-up</h3>
+<p>Employer statutory cost adds <strong>15–22% on top of base salary</strong> (some providers quote 20–25% including gratuity accrual and statutory bonus):</p>
+<div class="tw"><table>
+<thead><tr><th>Component</th><th>Rate</th><th>Base</th></tr></thead>
+<tbody>
+<tr><td>Provident Fund (employer)</td><td>12%</td><td>Basic pay</td></tr>
+<tr><td>Gratuity accrual</td><td>~4.81%</td><td>Basic pay</td></tr>
+<tr><td>ESI (employer)</td><td>3.25%</td><td>Wages up to ₹21,000/month only</td></tr>
+<tr><td>Professional tax</td><td>Capped ~₹2,500/yr</td><td>Per employee, state-dependent</td></tr>
+<tr><td>Labour welfare fund</td><td>Nominal</td><td>State-dependent</td></tr>
+<tr><td>Statutory bonus</td><td>Up to 20% of ₹7,000/month</td><td>Eligible employees only</td></tr>
+</tbody></table></div>
+<h3>Annual operating cost — all line items</h3>
+<div class="tw"><table>
+<thead><tr><th>Line item</th><th>Typical annual cost</th><th>Basis</th></tr></thead>
+<tbody>
+<tr><td>Salaries</td><td>70–80% of total opex</td><td>Per bands above</td></tr>
+<tr><td>Statutory employer contributions</td><td>+15–22% of salary</td><td>Per table above</td></tr>
+<tr><td>Variable pay / bonus pool</td><td>8–15% of salary</td><td>10% typical</td></tr>
+<tr><td>Annual increment provision</td><td><strong>9.1–9.3%</strong></td><td>Aon Feb 2026: GCC 9.3% projected, all-India 9.1%</td></tr>
+<tr><td>Real estate (rent + CAM + escalation)</td><td>$2,000–$4,000 per FTE</td><td>5–7% annual escalation standard</td></tr>
+<tr><td>Managed office alternative</td><td>₹8,000–₹24,000 per seat/month</td><td>All-inclusive</td></tr>
+<tr><td>IT — cloud, SaaS, licences</td><td>$1,200–$3,500 per FTE</td><td>The fastest-growing line</td></tr>
+<tr><td>Hardware refresh provision</td><td>$300–$500 per FTE</td><td>3-year cycle</td></tr>
+<tr><td>Facilities — utilities, housekeeping, security, cafeteria</td><td>$600–$1,500 per FTE</td><td></td></tr>
+<tr><td>Transport / shuttle</td><td>$200–$800 per FTE</td><td>Mandatory for night shifts</td></tr>
+<tr><td>Group health insurance</td><td>$250–$600 per FTE</td><td>Family floater standard</td></tr>
+<tr><td>Recruitment — replacement hiring</td><td>8–12% of CTC × attrition rate</td><td>At 20% on 100 FTE, 20 hires/year</td></tr>
+<tr><td>L&amp;D and certifications</td><td>$200–$600 per FTE</td><td>Underfunded almost everywhere</td></tr>
+<tr><td>Audit, tax filings, TP study, company secretarial</td><td>$20,000–$60,000 total</td><td>Not per FTE</td></tr>
+<tr><td>Payroll and compliance outsourcing</td><td>$8–$20 per employee/month</td><td></td></tr>
+<tr><td>Insurance — D&amp;O, PI, property</td><td>$10,000–$40,000 total</td><td></td></tr>
+<tr><td>Travel — India–HQ</td><td>$800–$2,500 per FTE</td><td>Scales down as the centre matures</td></tr>
+<tr><td>Entity standing overhead</td><td>$2,000–$3,500/month</td><td>Single state; rises with each additional</td></tr>
+</tbody></table></div>
+<h3>The hidden costs that break business cases</h3>
+<ol>
+<li><strong>Replacement hiring at scale.</strong> 20% attrition on 250 FTE is 50 hires a year, at recruitment fees plus 3–6 months of lost productivity each. Usually absent from the original model entirely.</li>
+<li><strong>Lease escalation.</strong> 5–7% annually on a nine-year lease compounds to roughly 1.7x by year nine. Model it.</li>
+<li><strong>Salary inflation outrunning the arbitrage.</strong> India increments ran 9.1% all-India and 9.3% in GCCs specifically for 2026 (Aon), with GCC pay inflating at or slightly above the market rather than below it. Indian IT services firms increment at only 6.6%, a persistent 2.7 percentage-point gap that makes GCCs the pay-setter. Note what cannot be said: without a validated US increment figure the annual erosion rate of the arbitrage cannot be computed, so do not quote one.</li>
+<li><strong>The transfer pricing markup.</strong> A 15.5–18% markup on the full cost base is a real cost to the parent and is frequently omitted from the savings calculation.</li>
+<li><strong>Night-shift and statutory transport obligations</strong> for teams covering US hours.</li>
+<li><strong>Dual-running costs during transition.</strong> If the GCC is absorbing work from HQ or a vendor, you pay twice for 3–9 months.</li>
+<li><strong>The counter-offer market.</strong> Notice periods of 60–90 days are standard; buyouts and retention bonuses to close senior offers are now routine in Bengaluru.</li>
+</ol>
+</section>
+
+<section id="s11">
+<span class="eb">11 &middot; Costing</span>
+<h2>Per-FTE economics and the arbitrage math</h2>
+<p class="lede">The number that decides a GCC is fully loaded annual cost per FTE. The number that gets it approved is the month the cumulative saving crosses the cumulative investment.</p>
+<h3>Year-one total cost by team size</h3>
+<div class="tw"><table>
+<thead><tr><th>Team</th><th>Setup</th><th>Salary + statutory</th><th>Real estate</th><th>Other opex</th><th>Year-1 total</th><th>Per FTE</th></tr></thead>
+<tbody>
+<tr><td>25</td><td>$300k–$700k</td><td>$750k–$1.25m</td><td>$50k–$100k</td><td>$75k–$150k</td><td>$1.2m–$2.2m</td><td><strong>$47k–$88k</strong></td></tr>
+<tr><td>50</td><td>$500k–$1.2m</td><td>$1.5m–$2.5m</td><td>$100k–$200k</td><td>$150k–$300k</td><td>$2.25m–$4.2m</td><td><strong>$45k–$84k</strong></td></tr>
+<tr><td>100</td><td>$900k–$2.0m</td><td>$3.0m–$5.0m</td><td>$200k–$400k</td><td>$300k–$600k</td><td>$4.4m–$8.0m</td><td><strong>$44k–$80k</strong></td></tr>
+<tr><td>250</td><td>$1.5m–$3.5m</td><td>$7.5m–$12.5m</td><td>$500k–$1.0m</td><td>$750k–$1.5m</td><td>$10.25m–$18.5m</td><td><strong>$41k–$74k</strong></td></tr>
+</tbody></table></div>
+<p>Note the shape of the curve — per-FTE cost falls only about 13% going from 25 to 250 people. <strong>Scale economics in a GCC are real but modest.</strong> The large savings come from location and role mix, not from size.</p>
+<div class="note note--crit"><span class="lbl">These are the least defensible numbers here</span><p>An October 2026 independent-validation run could not stand up the $25,000–$80,000 steady-state range, the 40–60% saving against a US build, or any of the component salary-saving percentages. EY's cost-per-FTE benchmarks — the one attempt at a hard independent anchor — were refuted under three-vote adversarial verification. Thirteen of seventeen cost items tested had no surviving independent source.</p><p>This does not mean the numbers are wrong. GCC cost savings are real and the ranges are consistent across many providers. It means <strong>no independent body has published a defensible per-FTE benchmark</strong>, and every figure in circulation traces back to firms selling GCC setup services. Quote them as industry convention, not as evidence. When a CFO asks for the source, the honest answer is that there isn't a good one — which is exactly why you build the client's own model.</p></div>
+<h3>Steady-state per-FTE cost</h3>
+<p>Once setup is amortised, steady-state run rate is <strong>$25,000–$80,000 per engineer per year</strong>, roughly 40–60% below a comparable US build. The spread is driven almost entirely by seniority mix and city.</p>
+<div class="tw"><table>
+<thead><tr><th>Comparison</th><th>India saving</th></tr></thead>
+<tbody>
+<tr><td>Salary vs US, all levels</td><td>40–70% lower</td></tr>
+<tr><td>Salary vs US, junior roles</td><td>70–85% lower</td></tr>
+<tr><td>Salary vs US, senior roles</td><td>50–65% lower</td></tr>
+<tr><td>Total operating cost vs US</td><td>40–60% lower</td></tr>
+<tr><td>Senior engineer: $25k–$50k India vs $150k–$250k US</td><td>~75–83% lower</td></tr>
+</tbody></table></div>
+<h3>What savings are real, and what are illusory</h3>
+<p><strong>Real:</strong> base salary differential, especially at junior and mid levels; real estate cost per seat; 24-hour coverage without US overtime premiums; retained institutional knowledge versus vendor churn.</p>
+<p><strong>Illusory or overstated:</strong></p>
+<ul>
+<li><strong>The savings number quoted before the TP markup.</strong> A $50k India FTE costs the parent ~$57.75k after a 15.5% markup.</li>
+<li><strong>Productivity parity assumed from month one.</strong> A realistic ramp is 40% productive in months 1–3, 70% in months 4–6, 90%+ from month 7 — roughly half a year of partial output per hire, repeated on every replacement.</li>
+<li><strong>Senior role savings.</strong> At staff-engineer and director level the gap has compressed to 50–65%, and for scarce AI/ML talent it can be under 50%.</li>
+<li><strong>Management overhead at HQ.</strong> Someone at headquarters now spends 20–40% of their time on India coordination. Real, but invisible in the India P&amp;L.</li>
+<li><strong>Savings on a 25-person centre.</strong> Fixed overhead swamps the arbitrage.</li>
+</ul>
+<h3>The payback model</h3>
+<p>Build the case as a cumulative cash-flow crossover, not an annual saving percentage:</p>
+<ol>
+<li><strong>Baseline:</strong> what the same work costs today at HQ or with a vendor, fully loaded.</li>
+<li><strong>India cost:</strong> year-one total including setup, plus the TP markup.</li>
+<li><strong>Ramp adjustment:</strong> discount India output by the productivity curve for the first two quarters.</li>
+<li><strong>Crossover month:</strong> typically <strong>month 14–24</strong> for a 100-FTE greenfield; <strong>month 6–10</strong> for EOR-first or managed.</li>
+<li><strong>Three-year NPV</strong> at the client's hurdle rate, with India salary inflation at ~9.2% and lease escalation at 5–7%.</li>
+</ol>
+<div class="note"><span class="lbl">The one slide that sells it</span><p>Two numbers side by side: fully loaded cost per FTE today against fully loaded cost per FTE in India at steady state, after markup — then the crossover month. A 40–60% unit-cost reduction with a 14–24 month payback survives CFO scrutiny. A claimed 70% saving with no markup, no ramp and no attrition does not, and loses the room the moment someone checks it.</p></div>
+</section>
+
+<section id="s12">
+<span class="eb">12 &middot; Worked example</span>
+<h2>Case study: Northvale Clinical Systems</h2>
+<div class="note note--warn"><p>A constructed example, not a real company. Every number is built from the validated ranges in the costing sections, so the model is defensible and the arithmetic holds. Use it as the template you populate with a real client's figures.</p></div>
+<h3>The company and the trigger</h3>
+<p>Northvale Clinical Systems is a US-headquartered clinical trial software company — $180m revenue, 740 employees, PE-backed, Boston HQ. Three pressures arrived at once: engineering hiring in Boston was taking 94 days at an average loaded cost of $205,000 per engineer; their Pune outsourcing vendor had raised rates 11% and lost two key people on the account; and the PE sponsor wanted 300 basis points of margin improvement before the next funding round.</p>
+<p>The mandate: <strong>build a 150-FTE engineering and clinical-operations centre in India within 18 months.</strong></p>
+<h3>The charter</h3>
+<div class="tw"><table>
+<thead><tr><th>Function</th><th>FTE at steady state</th><th>Why India</th></tr></thead>
+<tbody>
+<tr><td>Product engineering</td><td>70</td><td>Scale and cost; roadmap backlogged 14 months</td></tr>
+<tr><td>QA and test automation</td><td>25</td><td>Cost; work is well-specified</td></tr>
+<tr><td>Clinical data operations</td><td>30</td><td>Scale; large pool of life-sciences graduates</td></tr>
+<tr><td>DevOps and platform</td><td>10</td><td>Follow-the-sun coverage</td></tr>
+<tr><td>Data and analytics</td><td>8</td><td>Talent access — cannot hire in Boston</td></tr>
+<tr><td>Enabling (HR, finance, IT, facilities)</td><td>7</td><td>Required to run the entity</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>150</strong></td><td></td></tr>
+</tbody></table></div>
+<h3>Model and location</h3>
+<p><strong>EOR-first, converting to own entity at month 5, in a managed office.</strong> The PE sponsor would not approve $2m of capex on an unproven thesis, but would approve an operating expense that could be stopped. Hiring started in week 3 via EOR while incorporation ran in parallel.</p>
+<p><strong>Hyderabad.</strong> Bengaluru offered the deepest product pool but 25% higher rent and 25% attrition. Hyderabad gave a strong life-sciences technology cluster, rent at ₹75/sq ft, salary index 0.90, and attrition near 18%. Pune was eliminated to avoid non-solicit conflict with the incumbent vendor.</p>
+<h3>Ramp plan</h3>
+<div class="tw"><table>
+<thead><tr><th>Month</th><th>Cumulative FTE</th><th>Milestone</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>0</td><td>Mandate signed, city chosen, SPICe+ filed, EOR contracted</td></tr>
+<tr><td>2</td><td>3</td><td>GCC head search launched; first 3 senior engineers via EOR</td></tr>
+<tr><td>3</td><td>8</td><td>Managed office signed (120 seats); engineering manager joins</td></tr>
+<tr><td>4</td><td>15</td><td>GCC head offer accepted; entity incorporated</td></tr>
+<tr><td>5</td><td>25</td><td>EOR population transferred to own entity; PF/ESI live</td></tr>
+<tr><td>6</td><td>40</td><td>GCC head joins; first product pod delivering</td></tr>
+<tr><td>9</td><td>75</td><td>Clinical ops team live; vendor transition wave 1 complete</td></tr>
+<tr><td>12</td><td>110</td><td>Vendor contract wound down; analytics pod formed</td></tr>
+<tr><td>18</td><td>150</td><td>Steady state reached</td></tr>
+</tbody></table></div>
+<h3>Three-year financial model (USD)</h3>
+<div class="tw"><table>
+<thead><tr><th>Line</th><th>Year 1</th><th>Year 2</th><th>Year 3</th></tr></thead>
+<tbody>
+<tr><td>Average FTE in year</td><td>62</td><td>132</td><td>150</td></tr>
+<tr><td>Salaries</td><td>$1,890,000</td><td>$4,420,000</td><td>$5,430,000</td></tr>
+<tr><td>Statutory loading @ 18%</td><td>$340,000</td><td>$796,000</td><td>$977,000</td></tr>
+<tr><td>Variable pay @ 10%</td><td>$189,000</td><td>$442,000</td><td>$543,000</td></tr>
+<tr><td>Managed office @ $2,900/seat/yr</td><td>$225,000</td><td>$380,000</td><td>$420,000</td></tr>
+<tr><td>IT, cloud, licences</td><td>$155,000</td><td>$290,000</td><td>$330,000</td></tr>
+<tr><td>Recruitment fees</td><td>$310,000</td><td>$205,000</td><td>$165,000</td></tr>
+<tr><td>Insurance, L&amp;D, transport, facilities</td><td>$115,000</td><td>$230,000</td><td>$265,000</td></tr>
+<tr><td>Compliance, audit, TP, payroll, entity</td><td>$95,000</td><td>$85,000</td><td>$85,000</td></tr>
+<tr><td>HQ travel and dual-running</td><td>$240,000</td><td>$120,000</td><td>$80,000</td></tr>
+<tr><td>One-time setup</td><td>$420,000</td><td>—</td><td>—</td></tr>
+<tr><td><strong>India entity cost</strong></td><td><strong>$3,979,000</strong></td><td><strong>$6,968,000</strong></td><td><strong>$8,295,000</strong></td></tr>
+<tr><td>TP markup @ 15.5%</td><td>$617,000</td><td>$1,080,000</td><td>$1,286,000</td></tr>
+<tr><td><strong>Total cost to parent</strong></td><td><strong>$4,596,000</strong></td><td><strong>$8,048,000</strong></td><td><strong>$9,581,000</strong></td></tr>
+<tr><td><strong>Cost per FTE to parent</strong></td><td><strong>$74,100</strong></td><td><strong>$60,970</strong></td><td><strong>$63,870</strong></td></tr>
+<tr><td>Baseline: same work at HQ / vendor</td><td>$7,440,000</td><td>$16,500,000</td><td>$19,650,000</td></tr>
+<tr><td><strong>Gross annual saving</strong></td><td><strong>$2,844,000</strong></td><td><strong>$8,452,000</strong></td><td><strong>$10,069,000</strong></td></tr>
+<tr><td>Productivity-ramp adjustment</td><td>($1,420,000)</td><td>($310,000)</td><td>—</td></tr>
+<tr><td><strong>Net saving</strong></td><td><strong>$1,424,000</strong></td><td><strong>$8,142,000</strong></td><td><strong>$10,069,000</strong></td></tr>
+</tbody></table></div>
+<p><strong>Cumulative net saving crosses cumulative investment in month 11.</strong> Three-year net saving: approximately $19.6m. Steady-state unit cost $63,870 per FTE against a $131,000 blended baseline — a <strong>51% reduction</strong>, squarely inside the validated 40–60% band.</p>
+<h3>What Northvale got wrong</h3>
+<ol>
+<li><strong>They hired the GCC head at month 4, not month 1.</strong> The first 15 hires were made by a Boston engineering director over video calls. Six of those 15 left within a year — a 40% first-cohort attrition rate against 18% for everyone hired after the GCC head joined.</li>
+<li><strong>They leased 120 seats for 150 people and still ran out of space.</strong> Hybrid policy drifted to four days in office once teams formed, because new teams need proximity. The seat ratio assumption was made from HQ's hybrid norms, not India's.</li>
+<li><strong>They omitted the TP markup from the board paper.</strong> The first board review showed costs 15.5% above plan with no explanation, which cost the sponsor credibility for two quarters.</li>
+<li><strong>They under-budgeted replacement hiring by half.</strong> The model assumed 15% attrition; actual was 21% in year two, concentrated in the 6–10 year engineering band — exactly where the market data says it concentrates.</li>
+</ol>
+<div class="note"><span class="lbl">How to use this</span><p>Replace the charter table, the city, and the baseline cost with real figures. Keep the structure: charter → model → ramp → three-year P&amp;L → crossover month → what typically goes wrong. The last section is what makes it credible rather than promotional. A business case that names its own failure modes is far harder to argue with than one that does not.</p></div>
+</section>
+
+<section id="s13">
+<span class="eb">13 &middot; Organisation</span>
+<h2>Team structure and org design</h2>
+<p class="lede">The structural question that decides whether a GCC becomes a capability centre or stays a delivery shop is not the org chart — it is whether the India team reports into work or into a function.</p>
+<p>A pod that owns a product area and reports to a product leader builds capability. A pool of engineers assigned to tickets from HQ does not, no matter how it is drawn.</p>
+<h3>The GCC head — the single most important hire</h3>
+<p>Hire this person <strong>first, before the first engineer</strong>. Northvale's 40% first-cohort attrition is what happens otherwise, and it is the most reliably repeated mistake in the field.</p>
+<ul>
+<li>15–25 years' experience, with <strong>prior experience building a centre from under 50 to over 200 people</strong> — not running a mature 2,000-person site. Different jobs.</li>
+<li>Credible to HQ engineering leadership on technical substance, not just operations.</li>
+<li>Deep local network for senior hiring — the first 20 senior hires come mostly through them.</li>
+<li>Willing to do operational work for the first year. At 40 FTE there is no HR team and no one else to fix the internet.</li>
+<li>Reports to a <strong>business leader at HQ, not to HR or to a shared-services function.</strong> Reporting line signals charter more than any mandate document.</li>
+</ul>
+<p>Budget ₹140–450 lakhs CTC depending on scale and charter, plus a 25–33% search fee. Expect a 3–6 month search. Start it in week one.</p>
+<h3>Structure by stage</h3>
+<div class="tw"><table>
+<thead><tr><th>Stage</th><th>FTE</th><th>Structure</th><th>Enabling functions</th></tr></thead>
+<tbody>
+<tr><td><strong>Outpost</strong></td><td>10–40</td><td>2–3 pods of 5–12, pod leads reporting to the GCC head. No layers.</td><td>Outsourced payroll, compliance, facilities. One HR generalist at ~30 FTE.</td></tr>
+<tr><td><strong>Satellite</strong></td><td>40–120</td><td>4–8 pods grouped into 2–3 functions. One management layer appears.</td><td>HR manager, IT support (1 per 60–80), finance/compliance manager.</td></tr>
+<tr><td><strong>Portfolio hub</strong></td><td>120–350</td><td>Functions with real ownership; EMs plus senior managers; dedicated architecture and QA.</td><td>Full HR team, in-house TA, finance controller, IT team, legal/compliance lead.</td></tr>
+<tr><td><strong>Transformation hub</strong></td><td>350+</td><td>Multi-site, product-line organisation; India holds global roles.</td><td>All functions in-house; India HR leader, CoE structures, L&amp;D, internal comms.</td></tr>
+</tbody></table></div>
+<h3>The ratios to plan against</h3>
+<div class="tw"><table>
+<thead><tr><th>Ratio</th><th>Benchmark</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Engineering manager : engineers</td><td>1 : 8–12</td><td>Below 1:6 over-managed; above 1:15 quality drifts</td></tr>
+<tr><td>HR : total FTE</td><td>1 : 60–80</td><td>1:50 while hiring 10+/month</td></tr>
+<tr><td>In-house recruiter : hires per month</td><td>1 : 6–8</td><td>Below 100 FTE, use agencies</td></tr>
+<tr><td>IT support : FTE</td><td>1 : 70–100</td><td>Lower for regulated environments</td></tr>
+<tr><td>Finance/compliance : FTE</td><td>1 : 150–250</td><td>Plus external audit, TP and CS support</td></tr>
+<tr><td>Facilities : FTE</td><td>1 : 200+</td><td>Zero in a managed office</td></tr>
+<tr><td>Enabling functions as % of total</td><td>5–8%</td><td>Above 10% signals a bloated centre</td></tr>
+<tr><td>Span of control at director level</td><td>4–7 managers</td><td></td></tr>
+</tbody></table></div>
+<h3>Solid line vs dotted line — the real decision</h3>
+<ol>
+<li><strong>Functional solid line to HQ.</strong> The India engineer reports to an HQ manager; the GCC head owns only site operations. Fast to set up, and the known route to the career-ceiling problem. The GCC head becomes a facilities manager with a big title.</li>
+<li><strong>Dual reporting.</strong> Solid line to India management, dotted to HQ function. The workable middle, most common at 100–300 FTE. Requires genuine agreement on who sets priorities and who writes the review.</li>
+<li><strong>India-owned pods with HQ as stakeholder.</strong> The India leader owns the product area and outcome; HQ specifies what, India decides how. The only structure that produces a transformation hub.</li>
+</ol>
+<div class="note note--warn"><span class="lbl">The data makes the choice</span><p>42% of senior engineers leaving GCCs cite limited career progression and 28% cite lack of ownership over product outcomes, while only 19% cite base salary. <strong>You cannot pay your way out of a structural ownership problem</strong>, and most GCCs try to.</p></div>
+<h3>The first ten hires, in order</h3>
+<ol>
+<li>GCC head</li>
+<li>Senior engineering manager / tech lead — hires and sets the bar for the team</li>
+<li>HR / talent acquisition lead — before the hiring volume arrives</li>
+<li>First senior engineer, ideally someone the GCC head has worked with</li>
+<li>Second senior engineer</li>
+<li>Finance and compliance manager (fractional is fine under 50 FTE)</li>
+<li>IT / infrastructure engineer</li>
+<li>Second tech lead or first functional specialist</li>
+<li>First mid-level engineers (9–10)</li>
+</ol>
+<p><strong>Seniority first, then volume.</strong> Every GCC that hires 20 juniors before it has two senior engineers spends the following year fixing it.</p>
+</section>
+
+<section id="s14">
+<span class="eb">14 &middot; Compliance</span>
+<h2>Compliance and governance</h2>
+<p class="lede">India compliance is not difficult, it is relentless — a high volume of small, dated obligations where the penalty for missing one is disproportionate to its size.</p>
+<p>The failure mode is never complexity; it is someone forgetting. Build the calendar before the first employee.</p>
+<h3>The recurring compliance calendar</h3>
+<div class="tw"><table>
+<thead><tr><th>Frequency</th><th>Obligation</th><th>Deadline</th></tr></thead>
+<tbody>
+<tr><td>Monthly</td><td>TDS deposit on salaries and vendor payments</td><td>7th of following month</td></tr>
+<tr><td>Monthly</td><td>Provident Fund (ECR) return and payment</td><td>15th of following month</td></tr>
+<tr><td>Monthly</td><td>ESI contribution</td><td>15th of following month</td></tr>
+<tr><td>Monthly</td><td>Professional tax</td><td>State-specific, typically 15th–20th</td></tr>
+<tr><td>Monthly</td><td>GSTR-1 and GSTR-3B</td><td>11th and 20th of following month</td></tr>
+<tr><td>Quarterly</td><td>TDS returns (24Q, 26Q)</td><td>31st of month following quarter end</td></tr>
+<tr><td>Quarterly</td><td>Advance tax instalments</td><td>15 Jun / 15 Sep / 15 Dec / 15 Mar</td></tr>
+<tr><td>Quarterly</td><td>Board meeting (min. four a year, max 120-day gap)</td><td>Companies Act</td></tr>
+<tr><td>Annually</td><td>FLA return to RBI</td><td>15 July</td></tr>
+<tr><td>Annually</td><td>Income tax return</td><td>31 Oct (with TP: 30 Nov)</td></tr>
+<tr><td>Annually</td><td>Transfer pricing Form 3CEB</td><td>31 October</td></tr>
+<tr><td>Annually</td><td>Statutory audit and financial statements</td><td>Before AGM</td></tr>
+<tr><td>Annually</td><td>AOC-4 (financials with ROC)</td><td>30 days from AGM</td></tr>
+<tr><td>Annually</td><td>MGT-7 (annual return)</td><td>60 days from AGM</td></tr>
+<tr><td>Annually</td><td>AGM</td><td>Within 6 months of 31 March year end</td></tr>
+<tr><td>Annually</td><td>Director KYC (DIR-3 KYC)</td><td>30 September</td></tr>
+<tr><td>Annually</td><td>Gratuity actuarial valuation</td><td>At year end</td></tr>
+<tr><td>Event</td><td>FC-GPR on share allotment</td><td>Within 30 days</td></tr>
+<tr><td>Event</td><td>Shops &amp; Establishment renewal</td><td>State-specific cycle</td></tr>
+</tbody></table></div>
+<h3>The labour law stack</h3>
+<p>The four consolidated Labour Codes have been enacted but implementation is staggered across states, so in practice you comply with both the Codes and the legacy Acts depending on the state. The ones that bind a GCC:</p>
+<ul>
+<li><strong>Shops and Establishments Act</strong> (state) — hours, leave, holidays, women working night shifts, mandatory transport and security for late shifts.</li>
+<li><strong>Payment of Gratuity Act</strong> — 15 days' wages per year of service, payable after five years. Accrue from day one.</li>
+<li><strong>Maternity Benefit Act</strong> — 26 weeks paid leave. Mandatory crèche at 50+ employees. Frequently missed.</li>
+<li><strong>POSH Act</strong> — Internal Committee mandatory at 10+ employees, with an external member, plus annual report filing. <strong>The single most commonly neglected item in new GCCs.</strong></li>
+<li><strong>Contract Labour Act</strong> for housekeeping, security and transport vendors — principal-employer liability sits with you if the vendor defaults.</li>
+<li><strong>Rights of Persons with Disabilities Act</strong> — accessibility obligations on premises.</li>
+</ul>
+<h3>Data protection — the DPDP Act</h3>
+<p>The Digital Personal Data Protection Act, 2023 is the governing framework, with rules phased in: consent and notice, security safeguards, breach notification to the Data Protection Board, purpose limitation, and a Data Protection Officer where the entity is a Significant Data Fiduciary.</p>
+<p>For GCCs the practical question is almost always <strong>what the parent's data obligations impose on India</strong>, not what Indian law requires. A GCC handling EU personal data needs GDPR-grade controls and Standard Contractual Clauses between parent and subsidiary; one handling US healthcare data needs HIPAA Business Associate Agreements; one in financial services inherits the parent's regulator. Map the parent's regime first, then layer DPDP on top. This is routinely discovered six months late, when remediating access controls across a live centre is expensive.</p>
+<h3>SEZ and STPI — the honest position</h3>
+<p><strong>SEZ:</strong> the headline income tax holiday under section 10AA has sunset for new units — the deadline for commencing operations passed on 31 March 2020. New GCCs get no income tax holiday from an SEZ. What remains is duty-free imports and GST treatment, against significant procedural burden and location constraints. For most new GCCs, SEZ is no longer worth it. Say so plainly; a surprising number of advisors still pitch the lapsed benefit.</p>
+<p><strong>STPI:</strong> still useful. Duty-free capital goods import, simplified export documentation through Softex filings, single-window support, low compliance overhead. Worth doing for hardware-heavy centres; marginal for pure cloud operations.</p>
+<h3>Governance structure</h3>
+<ul>
+<li><strong>Board:</strong> minimum two directors, one resident in India. Keep at least one HQ executive on the board — it forces engagement.</li>
+<li><strong>Statutory registers and minutes</strong> maintained properly from incorporation. Examined in every diligence; gaps are expensive to fix retrospectively.</li>
+<li><strong>Operating governance</strong>, separate from statutory and more important day to day: a monthly operating review with the HQ sponsor, a quarterly business review with HQ leadership, and an annual charter review that explicitly asks whether the mandate should expand. Without that last one, the charter never grows.</li>
+<li><strong>Delegation of authority matrix</strong> — what the GCC head can sign without HQ approval. Set at incorporation. An India leader who needs sign-off for a ₹50,000 purchase cannot run a centre.</li>
+</ul>
+</section>
+
+<section id="s15">
+<span class="eb">15 &middot; Tax</span>
+<h2>Transfer pricing — the economics nobody models</h2>
+<p class="lede">Transfer pricing is where GCC business cases quietly lose 15–18% of their claimed savings.</p>
+<p>Understanding it properly is one of the clearest ways to be the most credible person in a GCC conversation, because most recruiters and many advisors cannot explain it.</p>
+<h3>The mechanic</h3>
+<p>A GCC does work for its parent. Indian tax law requires that transaction to be priced at arm's length. For a captive service centre the accepted method is <strong>cost plus</strong>: the India entity charges the parent its total operating cost plus a markup, and pays Indian corporate tax on that markup as its profit.</p>
+<p>So a centre with a $6m cost base and a 15.5% markup invoices the parent $6.93m. The $930,000 of profit is taxed in India. The parent's true cost is $6.93m, not $6m. <strong>Any savings calculation that uses the cost base rather than the invoiced amount overstates the saving by the full markup.</strong></p>
+<h3>Safe harbour margins</h3>
+<div class="tw"><table>
+<thead><tr><th>Period</th><th>Margin</th><th>Eligibility</th></tr></thead>
+<tbody>
+<tr><td>FY 2025–26 and earlier</td><td>17–18% operating margin on operating cost</td><td>IT/ITES, transaction value up to ₹300 crore</td></tr>
+<tr><td><strong>Tax year 2026–27 onwards</strong></td><td><strong>Single 15.5% operating margin on operating expense</strong></td><td>Unified across software development, ITeS, KPO and software-related contract R&amp;D; operating revenue up to <strong>₹2,000 crore</strong></td></tr>
+</tbody></table></div>
+<p>The 2026–27 reform is materially favourable and under-discussed: the margin drops from 17–18% to 15.5%, the eligibility ceiling rises from ₹300 crore to ₹2,000 crore, and four previously separate service categories are unified. A ₹2,000 crore ceiling covers virtually every mid-market GCC and most large ones.</p>
+<h3>Safe harbour, benchmarking study, or APA</h3>
+<div class="tw"><table>
+<thead><tr><th>Route</th><th>What it means</th><th>When to use it</th></tr></thead>
+<tbody>
+<tr><td><strong>Safe harbour</strong></td><td>Adopt 15.5% and file Form 3CEF. No TP audit on that transaction.</td><td>Default for most GCCs. Certainty beats a point or two of margin.</td></tr>
+<tr><td><strong>Benchmarking study</strong></td><td>Justify your own margin (often 10–14%) against comparables.</td><td>When the margin materially affects group tax and you can defend it. Invites scrutiny.</td></tr>
+<tr><td><strong>APA</strong></td><td>Pre-agree the margin with the authority for up to five years, rollback up to four prior years.</td><td>Large centres, complex charters, or where multi-year certainty is worth an 18–36 month process.</td></tr>
+</tbody></table></div>
+<h3>What actually gets challenged</h3>
+<p>India's transfer pricing officers have moved toward larger adjustments, and GCC markups are an explicit focus area alongside intra-group service charges, financial guarantees and tax-holiday units.</p>
+<ol>
+<li><strong>Cost base composition.</strong> Stock compensation, HQ-allocated costs and one-time setup costs are all contested.</li>
+<li><strong>Characterisation of the entity.</strong> The authority may argue the India centre is not a low-risk contract service provider but a genuine entrepreneur bearing risk and owning IP — justifying a far higher profit allocation to India. <strong>The more capability the GCC genuinely owns, the weaker the cost-plus characterisation becomes.</strong> The single most important forward-looking TP issue in the industry, and almost nobody raises it.</li>
+<li><strong>Comparables selection</strong> in a benchmarking study.</li>
+<li><strong>Marketing intangibles</strong> where the India entity's work builds parent brand value.</li>
+<li><strong>Loss-making or low-margin years</strong> — a captive is expected to earn a stable return regardless of parent performance.</li>
+</ol>
+<h3>Documentation that must exist</h3>
+<ul>
+<li><strong>Form 3CEB</strong> — accountant's report on international transactions, due 31 October.</li>
+<li><strong>Local file</strong> — TP study with functional and economic analysis, maintained contemporaneously. Required where international transactions exceed ₹1 crore.</li>
+<li><strong>Master file (Form 3CEAA)</strong> where group thresholds are met.</li>
+<li><strong>Country-by-Country report</strong> above the consolidated revenue threshold.</li>
+<li><strong>Intercompany agreement matching actual conduct.</strong> Where the paper and the practice diverge, the practice governs — and the paper becomes evidence against you.</li>
+</ul>
+<div class="note"><span class="lbl">Two things that follow</span><p>First, <strong>always include the markup in the cost model</strong> &mdash; a savings number built on the cost base rather than the invoiced amount is simply wrong, and a CFO will find it. Second, the <strong>characterisation risk</strong> matters for any GCC that is maturing: as India takes on more ownership, the cost-plus model that justified its tax position becomes harder to defend, and the savings case and the capability case begin to pull against each other.</p></div>
+</section>
+
+<section id="s16">
+<span class="eb">16 &middot; Policy</span>
+<h2>State incentives and policy</h2>
+<p class="lede">Since 2024, Indian states have been competing openly for GCCs with published policies and cash incentives. This is new, it is live, and most mid-market buyers have no idea it exists.</p>
+<h3>The national framework</h3>
+<p>Budget 2025 announced a <strong>National Framework for Global Capability Centres</strong>, guiding states to promote GCCs in emerging tier-2 cities, focused on skill development, infrastructure and AI-focused centres of excellence. Important caveat: unlike state policies, <strong>the national framework offers no capital subsidies or tax breaks</strong>. It is coordination. The money is at state level.</p>
+<div class="tw"><table>
+<thead><tr><th>State</th><th>Headline incentives</th><th>The catch</th></tr></thead>
+<tbody>
+<tr><td><strong>Karnataka</strong><br><span style="color:var(--ink-55);font-size:13px">GCC Policy 2024–29, India's first</span></td><td>50% reimbursement of internship stipends covering up to 100,000 students; 5-year electricity duty exemption; industrial power tariffs in "Beyond Bengaluru" locations; ₹100 crore AI innovation fund; <strong>nano GCCs of 5–50 employees get incentives with no minimum employment or investment threshold</strong></td><td>Best benefits tied to Beyond Bengaluru locations — Mysuru, Hubballi-Dharwad, Mangaluru, Belagavi — not Bengaluru itself</td></tr>
+<tr><td><strong>Uttar Pradesh</strong></td><td>Land subsidy 30–50%; stamp duty exemption; capital subsidy up to ₹25 crore; interest subsidy; opex reimbursement (lease, power, bandwidth, cloud) up to <strong>₹40 crore/year for Level-1 and ₹80 crore/year for Advanced GCCs over 5 years</strong>; payroll subsidies and fresher bonuses</td><td>Largest headline numbers in India, tied to tiered investment and employment commitments. Senior technical talent depth is the real constraint</td></tr>
+<tr><td><strong>Telangana</strong></td><td>Land subsidies, electricity benefits, employment-linked support, TS-iPASS single-window. Targeting 120 new GCCs</td><td>Hyderabad is already priced in; incentives strongest outside the core</td></tr>
+<tr><td><strong>Gujarat</strong></td><td>~₹10,000 crore GCC programme; capex assistance up to ₹50 crore for units below ₹250 crore GFCI; opex assistance up to ₹20 crore; 5G and cloud infrastructure support</td><td>Thinner deep-tech pool; strongest for finance, operations and engineering-adjacent charters</td></tr>
+<tr><td><strong>Tamil Nadu</strong></td><td>Established IT policy incentives, strong tier-2 corridor (Coimbatore, Madurai, Tiruchirappalli)</td><td>No dedicated GCC-branded policy with the same headline numbers</td></tr>
+<tr><td><strong>Maharashtra</strong></td><td>Established IT/ITES policy, Pune corridor strength</td><td>Least aggressive on new GCC-specific incentives; competes on existing ecosystem</td></tr>
+</tbody></table></div>
+<h3>How to actually monetise an incentive</h3>
+<p>The gap between a published incentive and cash in the bank is where most of these schemes die:</p>
+<ol>
+<li><strong>Apply before you commit.</strong> Almost every scheme requires approval before the investment is made or the lease signed. Retrospective applications are routinely rejected — this alone disqualifies most companies that discover incentives after choosing a city.</li>
+<li><strong>Read the employment commitment.</strong> Incentives are tied to minimum headcount sustained 3–5 years, with clawback if you fall short. If the ramp is uncertain, a smaller incentive with a lower commitment is worth more.</li>
+<li><strong>Opex reimbursement is claimed, not granted.</strong> Requires documented quarterly or annual claims with evidence. Unclaimed incentives are the norm, not the exception.</li>
+<li><strong>Capital subsidies are disbursed in tranches</strong> against verified milestones, often with a 12–24 month lag. Do not model them as year-one cash.</li>
+<li><strong>Negotiate directly.</strong> Above roughly 300 FTE, published policy is a floor. States negotiate bespoke packages, and a committed anchor tenant has real leverage.</li>
+</ol>
+<div class="note note--warn"><span class="lbl">The honest framing</span><p>Incentives should be worth <strong>3–8% of three-year operating cost</strong> in a well-chosen tier-2 location, and effectively nothing in central Bengaluru — though note this percentage is directional, and the October 2026 validation run found <em>zero</em> documented evidence of incentives actually disbursed under any state GCC policy, in either direction.</p><p><strong>Never let an incentive decide a location.</strong> A 10% talent-availability error costs more than any subsidy pays. Choose the city on talent and attrition, then harvest whatever incentive that city offers. Clients who invert this order end up with a subsidised centre they cannot staff.</p></div>
+</section>
+
+<section id="s17">
+<span class="eb">17 &middot; Risk</span>
+<h2>Failure modes</h2>
+<p class="lede">GCCs rarely fail loudly. They fail by stalling — 60 people, a transactional charter, 25% attrition, delivering enough not to be shut down and never enough to matter.</p>
+<h3>1. The attrition spiral</h3>
+<p>Voluntary attrition in Indian GCCs averages <strong>16–22%</strong>, rising to <strong>25–30%</strong> for AI/ML and senior engineering roles, and <strong>51% of GCCs name talent retention as their top concern</strong>.</p>
+<div class="tw"><table>
+<thead><tr><th>Reason given for leaving</th><th>Share of senior engineers</th></tr></thead>
+<tbody>
+<tr><td>Limited career progression</td><td><strong>42%</strong></td></tr>
+<tr><td>Lack of ownership over product outcomes</td><td><strong>28%</strong></td></tr>
+<tr><td>Base salary gap</td><td>19%</td></tr>
+</tbody></table></div>
+<div class="note note--crit"><span class="lbl">The whole argument, in one statistic</span><p>Three-quarters of senior attrition is structural — progression and ownership — and only a fifth is pay. A client responding to 25% attrition with a 12% salary correction is treating the wrong problem and will be back in a year with the same problem and a higher cost base.</p></div>
+<p><strong>Mitigation:</strong> give India pods end-to-end ownership of a product area; create a technical career ladder that reaches principal and distinguished engineer with real authority; put at least one India-based leader in a global role within 24 months; and measure the proportion of India roles that are global rather than site-specific.</p>
+<h3>2. The career-ceiling problem</h3>
+<p>Specific to the GCC model. India teams report into HQ functions that set strategy, so India executes and does not decide. Engineers with 6–10 years' experience read this correctly as a ceiling and leave — exactly the band where replacement is hardest and most expensive.</p>
+<p><strong>Mitigation:</strong> the ownership structures in section 13. There is no workaround that preserves execution-only reporting.</p>
+<h3>3. Mandate creep and charter starvation</h3>
+<p>Two opposite failures with the same cause — no charter discipline. <em>Creep</em>: the centre accumulates whatever HQ wants to offload and develops no deep capability in anything. <em>Starvation</em>: HQ promises scope that never arrives, the centre runs out of meaningful work by month 14, and good people leave.</p>
+<p><strong>Mitigation:</strong> a written charter naming what the centre does and explicitly what it does not; an annual charter review with the sponsor; and a rule that new scope arrives with its own headcount and budget rather than being absorbed.</p>
+<h3>4. The trust deficit</h3>
+<p>HQ teams fear the India centre is coming for their jobs, or believe its work is lower quality. The interesting work is retained at HQ, India gets maintenance and tickets, and the centre's quality never gets the chance to disprove the assumption. Self-fulfilling and extremely common.</p>
+<p><strong>Mitigation:</strong> be explicit at HQ about what India does and does not take; move HQ people into India-facing growth roles rather than displacing them; run exchange visits both directions in the first year; and give India one visible, high-stakes deliverable early — trust shifts on a demonstrated win far faster than on any communication plan.</p>
+<h3>5. The cost-centre trap</h3>
+<p>If the centre is measured only on cost per FTE and headcount, it will optimise for those and never build capability. Every budget cycle becomes a cost conversation, comp bands fall behind market, quality degrades, and the centre confirms the prejudice that it is a cheap back office.</p>
+<p><strong>Mitigation:</strong> change the metrics by month 18 — revenue or product influenced from India, features owned end to end, global roles held, IP generated, time to market. Cost per FTE stays on the dashboard but stops being the headline.</p>
+<h3>6. Leadership misfire</h3>
+<p>The wrong GCC head costs 12–18 months and typically the first two cohorts. The three recurring misfires: a delivery manager from an IT services firm who runs the centre as a billable utilisation shop; an operator from a 2,000-person mature site who cannot build from zero; and a strong individual contributor with no experience hiring at scale.</p>
+<h3>7. Compliance surprises</h3>
+<p>Contractors misclassified as consultants creating PF and gratuity arrears; no POSH Internal Committee; no crèche at 50+ employees; missed FLA returns; a TP position taken without documentation. None individually fatal; collectively they surface during diligence or an exit and reduce valuation or delay a transaction.</p>
+<p><strong>Mitigation:</strong> the compliance calendar from day one, outsourced to a specialist firm for the first two years. At $20,000–$60,000 a year it is the cheapest insurance in the build.</p>
+<h3>8. Real estate over-commitment</h3>
+<p>A nine-year lease signed in month two for the year-three headcount, at 1:1 seat ratio, with 5–7% annual escalation. If the ramp slows, the client pays for empty floors for seven years.</p>
+<p><strong>Mitigation:</strong> managed office or short-term flex space until the ramp is proven at 60–70% of plan; then lease, with expansion rights on adjacent space rather than pre-committed area; and a seat ratio derived from the client's own attendance data rather than a published benchmark, since none survives scrutiny.</p>
+</section>
+
+<section id="s18">
+<span class="eb">18 &middot; Maturity</span>
+<h2>The maturity curve</h2>
+<p class="lede">Only about 27% of GCCs reach Portfolio Hub within five years. Nearly three-quarters stall as execution shops.</p>
+<p>Zinnov's framework describes four stages — Outpost, Satellite, Portfolio Hub and Transformation Hub. Knowing why centres stall, and what moves them up, is the difference between advising on a GCC and staffing one.</p>
+<figure>
+<div class="fig-wrap">
+<svg viewBox="0 0 760 548" role="img" aria-label="GCC maturity curve: four stages from outpost to transformation hub" style="font-family:var(--font);font-size:13px">
+  <defs><marker id="mat-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink-25)"/></marker></defs>
+  <text x="24" y="30" font-size="15" font-weight="500" fill="var(--ink)">Only about 27% of GCCs reach portfolio hub within five years</text>
+  <text x="24" y="50" font-size="11.5" fill="var(--ink-55)">What changes at each stage: charter, talent, and what the centre is measured on</text>
+  <g fill="none" stroke="var(--ink-25)" stroke-width="1.25">
+    <path d="M64 164V180H116V196" marker-end="url(#mat-arrow)"/>
+    <path d="M116 284V300H168V316" marker-end="url(#mat-arrow)"/>
+    <path d="M168 404V420H220V436" marker-end="url(#mat-arrow)"/>
+  </g>
+  <g>
+    <rect x="24" y="76" width="460" height="88" fill="none" stroke="var(--ink-25)" stroke-width="1.25"/>
+    <text x="40" y="100" font-size="13" font-weight="600" fill="var(--ink)">1 &#183; Outpost — 10 to 40 FTE</text>
+    <text x="40" y="116" font-size="11.5" fill="var(--ink)">Charter: executes defined tasks set at headquarters</text>
+    <text x="40" y="132" font-size="11.5" fill="var(--ink)">Talent: mostly junior and mid, hired for named skills</text>
+    <text x="40" y="148" font-size="11.5" fill="var(--ink-55)">Measured on: cost per FTE, headcount, SLA adherence</text>
+  </g>
+  <g>
+    <rect x="76" y="196" width="460" height="88" fill="none" stroke="var(--ink-25)" stroke-width="1.25"/>
+    <text x="92" y="220" font-size="13" font-weight="600" fill="var(--ink)">2 &#183; Satellite — 40 to 120 FTE</text>
+    <text x="92" y="236" font-size="11.5" fill="var(--ink)">Charter: owns whole processes or system components</text>
+    <text x="92" y="252" font-size="11.5" fill="var(--ink)">Talent: first senior engineers and engineering managers</text>
+    <text x="92" y="268" font-size="11.5" fill="var(--ink-55)">Measured on: delivery quality, velocity, cost per FTE</text>
+  </g>
+  <g>
+    <rect x="128" y="316" width="460" height="88" fill="var(--accent)" fill-opacity=".12" stroke="var(--accent)" stroke-width="2"/>
+    <text x="144" y="340" font-size="13" font-weight="600" fill="var(--ink)">3 &#183; Portfolio hub — 120 to 350 FTE</text>
+    <text x="144" y="356" font-size="11.5" fill="var(--ink)">Charter: owns products and roadmap areas end to end</text>
+    <text x="144" y="372" font-size="11.5" fill="var(--ink)">Talent: architects, principal engineers, product managers</text>
+    <text x="144" y="388" font-size="11.5" fill="var(--ink-55)">Measured on: features owned, time to market, outcomes</text>
+  </g>
+  <g>
+    <rect x="180" y="436" width="460" height="88" fill="none" stroke="var(--ink-25)" stroke-width="1.25"/>
+    <text x="196" y="460" font-size="13" font-weight="600" fill="var(--ink)">4 &#183; Transformation hub — 350+ FTE</text>
+    <text x="196" y="476" font-size="11.5" fill="var(--ink)">Charter: sets direction and holds global role mandates</text>
+    <text x="196" y="492" font-size="11.5" fill="var(--ink)">Talent: global leaders based in India, deep-tech specialists</text>
+    <text x="196" y="508" font-size="11.5" fill="var(--ink-55)">Measured on: revenue influenced, IP created, global impact</text>
+  </g>
+</svg>
+</div>
+<figcaption>GCC maturity curve &middot; 4 stages. Headcount bands are indicative — maturity is about charter, not size.</figcaption>
+</figure>
+<p>A 60-person centre with real product ownership outranks a 400-person ticket shop.</p>
+<h3>What actually moves a centre up a stage</h3>
+<p>Not headcount, and not time. Four things, in order of impact:</p>
+<ol>
+<li><strong>Transfer of decision rights, not just work.</strong> The stage change happens when India decides <em>how</em>, and eventually <em>what</em>, rather than executing a specification. Everything else follows this.</li>
+<li><strong>A senior technical bench.</strong> You cannot own a product with a team whose most experienced person has six years' experience.</li>
+<li><strong>One India-based person holding a global role.</strong> The first time someone in Bengaluru owns a function worldwide, the ceiling visibly breaks and the retention effect on the next tier is immediate.</li>
+<li><strong>Changing the metrics.</strong> A centre measured on cost per FTE will stay a cost centre. Change what the dashboard reports and behaviour follows within two quarters.</li>
+</ol>
+<h3>Metrics by stage</h3>
+<div class="tw"><table>
+<thead><tr><th>Stage</th><th>Primary metrics</th><th>The metric to add next</th></tr></thead>
+<tbody>
+<tr><td>Outpost</td><td>Cost per FTE, headcount vs plan, SLA adherence</td><td>Quality and defect escape rate</td></tr>
+<tr><td>Satellite</td><td>Delivery velocity, quality, attrition, cost per FTE</td><td>Share of work owned end to end</td></tr>
+<tr><td>Portfolio hub</td><td>Features owned, time to market, senior retention</td><td>Revenue or product influenced from India</td></tr>
+<tr><td>Transformation hub</td><td>Revenue influenced, IP and patents, global roles held</td><td>Innovation funded from India's own budget</td></tr>
+</tbody></table></div>
+<h3>The mid-market advantage</h3>
+<p>Mid-market GCCs advance along this curve <strong>1.2x faster</strong> than larger centres and show <strong>1.3x higher presence as transformation hubs</strong>, despite operating at around 40% of the scale. The mechanism is simple: a $300m-revenue parent cannot afford a 500-person execution-only centre, so India gets real ownership earlier out of necessity. <strong>Smaller parents build better centres.</strong> A counter-intuitive finding, and one that cuts against the assumption that a GCC is something only large enterprises can run.</p>
+<h3>The honest tension</h3>
+<p>As a centre climbs this curve, two things pull against each other. The capability case gets stronger — India owns products, holds global roles, creates IP. The tax case gets weaker, because a centre that genuinely owns IP and bears risk is harder to characterise as a low-risk contract service provider earning a 15.5% cost-plus markup. Few analyses connect these two.</p>
+</section>
+
+
+
+<section id="s20">
+<span class="eb">19 &middot; Method</span>
+<h2>Sources, confidence and maintenance</h2>
+<p class="lede">Not all numbers here are equally solid. Treat them accordingly when quoting them.</p>
+<div class="tw"><table>
+<thead><tr><th>Confidence</th><th>Which figures</th><th>How to use them</th></tr></thead>
+<tbody>
+<tr><td><strong>Hard</strong><br><span style="color:var(--ink-55);font-size:13px">statutory or published rates</span></td><td>PF 12%, gratuity 4.81%, ESI 3.25%, professional tax cap ₹2,500, safe harbour 15.5% / ₹2,000 crore, all compliance deadlines, state policy headline numbers</td><td>Quote directly. Verify TP numbers against the current year's rules before any filing advice.</td></tr>
+<tr><td><strong>Well-triangulated</strong><br><span style="color:var(--ink-55);font-size:13px">consistent across sources</span></td><td>Market size and headcount, attrition 16–22%, fit-out per sq ft (C&amp;W corroborated by JLL), office vacancy and GCC leasing share, India salary inflation 9.1–9.3% (Aon, Deloitte), the attrition-reason split</td><td>Quote with the range, not a point estimate. Name the source when it matters.</td></tr>
+<tr><td><strong>Directional</strong><br><span style="color:var(--ink-55);font-size:13px">restate per client</span></td><td>Salary bands, city salary indices, team structure ratios, payback months, incentive value as % of opex, the 500-FTE extrapolation, seat-to-headcount ratios, lease escalation norms</td><td>A starting frame only — validate against the client's actual roles and a live comp benchmark.</td></tr>
+<tr><td><strong>Constructed</strong></td><td>The entire Northvale case study</td><td>Present explicitly as an illustrative model, never as a client reference.</td></tr>
+</tbody></table></div>
+<p>Two cautions worth stating plainly. Many cost and salary sources are published by GCC service providers, who have an interest in the numbers looking favourable — the ranges triangulate well, but treat the low end as marketing and the midpoint as realistic. And salary bands move 8–12% a year in India, so any band here has a shelf life of roughly two quarters.</p>
+
+<h3>The October 2026 validation run</h3>
+<p>Seventeen cost and pricing claims were put through a multi-source research pass prioritising independent publishers over GCC vendors, with each extracted claim adversarially verified by three independent votes. <strong>Thirteen of twenty-four verified claims were killed. Four of the seventeen cost items survived.</strong></p>
+<h3>What was independently confirmed</h3>
+<div class="tw"><table>
+<thead><tr><th>Finding</th><th>Source</th><th>Independence</th></tr></thead>
+<tbody>
+<tr><td>Fit-out ₹5,847–6,567/sq ft for a collaborative hybrid workplace; Mumbai highest, 12% city spread</td><td>C&amp;W 2026 guide, corroborated within 1–2% by JLL</td><td>Two competing brokerages agreeing — strong</td></tr>
+<tr><td>Vacancy at a five-year low (JLL 14.5% top-7; C&amp;W 13.7% top-8); rents appreciating; Q2 2026 absorption 11.6 msf vs 12.2 msf completions</td><td>JLL, C&amp;W</td><td>Brokerages favour a tight-market story — but both agree</td></tr>
+<tr><td>GCCs the largest occupier group: 32.6 msf in 2025, 38% of transactions; Bengaluru 47% of GCC leasing</td><td>Knight Frank, JLL</td><td>Independent of GCC advisory</td></tr>
+<tr><td>Salary inflation 9.1% all-India, 9.3% for GCCs, vs 6.6% for Indian IT services</td><td>Aon (Feb 2026), Deloitte</td><td>Aon sells comp consulting but has no stake in GCC cost conclusions</td></tr>
+</tbody></table></div>
+<h3>What failed verification</h3>
+<ul>
+<li>EY's GCC all-in cost-per-FTE benchmarks — refuted 3-0. The only independent per-FTE anchor available.</li>
+<li>Knight Frank's city-wise average rent table and city-level Grade-A vacancy — refuted 3-0.</li>
+<li>"Employee expenses were 76.2% of GCC cost" and "cost growth is driven almost entirely by salary" — both refuted 3-0.</li>
+<li>The 1.5 headcount-per-seat hybrid benchmark — refuted 3-0.</li>
+<li>Four separate salary-increment projections, including two Aon-attributed figures from a superseded October 2025 vintage. <strong>Use the February 2026 numbers; do not quote the 9.0% / 9.5% pair.</strong></li>
+</ul>
+<h3>What has no evidence either way</h3>
+<p>Setup cost by team size, year-one cost per FTE, steady-state cost per engineer, the 40–60% US savings claim, managed-office per-seat pricing, salary bands by role, statutory loading totals, EOR pricing and the entity crossover point, entity standing overhead, lease escalation norms, productivity ramp curves, recruitment fee norms, and the cash value of state incentives. Thirteen items, no surviving independent source. <strong>Their absence from the evidence base is itself a finding — do not quietly refill them from vendor material.</strong></p>
+<div class="note"><span class="lbl">The commercial read</span><p>The property numbers are solid and the compensation inflation numbers are solid. The unit economics — the part every client actually asks about — rest on an industry consensus no independent body has tested. That is a weakness in the field, not just in this playbook, and it is worth saying plainly: there is no credible, independently derived cost-per-FTE benchmark for India GCCs in the public domain.</p></div>
+
+<h3>What to re-validate, and when</h3>
+<div class="tw"><table>
+<thead><tr><th>Item</th><th>Re-check</th></tr></thead>
+<tbody>
+<tr><td>Salary bands</td><td>Every 6 months — they move 8–12% a year</td></tr>
+<tr><td>Transfer pricing safe harbour rates</td><td>Annually, and after every Budget</td></tr>
+<tr><td>State incentive policies</td><td>Every 6 months — the fastest-moving area</td></tr>
+<tr><td>Office rents and vacancy</td><td>Quarterly in Bengaluru, half-yearly elsewhere</td></tr>
+<tr><td>Market size and headcount</td><td>Annually, on the Nasscom–Zinnov release</td></tr>
+<tr><td>Labour Code implementation</td><td>Every 6 months — state rollout is ongoing</td></tr>
+<tr><td>DPDP rules and enforcement</td><td>Every 6 months while rules phase in</td></tr>
+</tbody></table></div>
+
+<h3>The research agenda</h3>
+<p>Five open questions, each one nobody in the market has answered:</p>
+<ol>
+<li><strong>Within-city basic-versus-premium fit-out spread, and the real seat-to-headcount ratio under hybrid.</strong> The highest-leverage assumption in any rent or fit-out calculation, and the published benchmark failed verification.</li>
+<li><strong>An independently derived all-in cost per FTE.</strong> The largest gap in the public evidence base.</li>
+<li><strong>Grade-A rents and vacancy for genuine tier-2 candidates</strong> — Coimbatore, Kochi, Indore, Jaipur, Chandigarh, Mangalore. No priced source covers them.</li>
+<li><strong>Documented evidence of state GCC incentives actually disbursed</strong>, not merely announced.</li>
+<li><strong>The 2027 India projection alongside US increment rates</strong>, without which the arbitrage erosion rate cannot be computed.</li>
+</ol>
+</section>
+
+</main>
+</div>
+
+<footer>
+<div class="src-grid">
+  <div>
+    <h4>Market and landscape</h4>
+    <ul>
+      <li><a href="https://community.nasscom.in/communities/nasscom-insights/india-gcc-landscape-report-5-year-journey">Nasscom — India GCC Landscape Report</a></li>
+      <li><a href="https://zinnov.com/centers-of-excellence/zinnov-nasscom-mid-market-global-capability-centers-gccs-2025-report/">Zinnov–Nasscom — Mid-Market GCCs 2025</a></li>
+      <li><a href="https://zinnov.com/centers-of-excellence/global-capability-centers-101-all-you-need-to-know-about-gccs-blog/">Zinnov — GCC maturity framework</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Real estate (independent)</h4>
+    <ul>
+      <li><a href="https://www.cushmanwakefield.com/en/india/insights/office-fit-out-cost-guide">C&amp;W — India office fit-out cost guide</a></li>
+      <li><a href="https://www.cushmanwakefield.com/en/india/insights/india-office-market-report">C&amp;W — India office market report</a></li>
+      <li><a href="https://www.jll.com/en-in/insights/market-dynamics/india-office">JLL — India office market dynamics</a></li>
+      <li><a href="https://www.jll.com/en-in/newsroom/office-fit-out-costs-across-india-increase-slightly-up-45-year-on-year-jll">JLL — fit-out costs up 4.5% YoY</a></li>
+      <li><a href="https://content.knightfrank.com/research/3070/documents/en/india-real-estate-office-and-residential-market-h2-2025-12597.pdf">Knight Frank — India real estate H2 2025</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Compensation</h4>
+    <ul>
+      <li><a href="https://www.aon.com/apac/in-the-press/asia-newsroom/2026/aon-survey-projects-slight-uptick-in-salaries-in-india-2026">Aon — India salary increase survey, Feb 2026</a></li>
+      <li><a href="https://www.deloitte.com/in/en/about/press-room/average-increment-in-india-is-expected-to-be-9-1-percent-in-2026.html">Deloitte — 9.1% average increment 2026</a></li>
+      <li><a href="https://community.nasscom.in/communities/nasscom-insights/india-technology-industry-compensation-benchmarking-survey-findings-2025">Nasscom — tech compensation benchmarking</a></li>
+      <li><a href="https://gccera.com/blog/gcc-salary-report-2026">GCC ERA — GCC salary report</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Tax, legal, policy</h4>
+    <ul>
+      <li><a href="https://www.internationaltaxreview.com/article/2gdcaqvrrdl6lghb2x728/sponsored/indias-tp-reset-for-the-digital-economy-safe-harbour-and-apa-reforms">ITR — India's TP reset: safe harbour and APA</a></li>
+      <li><a href="https://treelife.in/compliance/fema-compliance-in-india/">Treelife — FEMA compliance guide</a></li>
+      <li><a href="https://india-briefing.com/news/karnataka-global-capability-center-policy-2024-2029-key-features-35441.html">India Briefing — Karnataka GCC Policy</a></li>
+      <li><a href="https://www.khaitanco.com/thought-leadership/Uttar-Pradesh-releases-its-final-GCC-Policy">Khaitan &amp; Co — UP GCC Policy</a></li>
+      <li><a href="https://www.jll.com/en-in/insights/beyond-metros-the-tier-two-emergence">JLL — tier-II emergence</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Talent and attrition</h4>
+    <ul>
+      <li><a href="https://www.business-standard.com/industry/news/gccs-india-talent-retention-top-challenge-ciel-hr-study-125060500776_1.html">Business Standard — CIEL HR retention study</a></li>
+      <li><a href="https://www.plugscale.com/gcc-attrition-india-2026">Plugscale — GCC attrition and retention</a></li>
+      <li><a href="https://analyticsindiamag.com/gcc/talents-walking-out-and-gccs-are-taking-notice">Analytics India — why GCC talent walks out</a></li>
+    </ul>
+  </div>
+</div>
+<p style="max-width:70ch">Compiled for Recruise Global. Figures as of 5 October 2026; cost and compensation data carries a shelf life of roughly two quarters. Vendor-published figures are flagged where they appear.</p>
+<p style="color:var(--accent);font-weight:500">Let's build what's next.</p>
+</footer>
+</div>
+
+</body>
+</html>
